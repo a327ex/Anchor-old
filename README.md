@@ -2,7 +2,7 @@
 
 ### JUGGLRX prototype
 
-A prototype made in 4 days written in MoonScript. It's a simple game about juggling as many balls as possible without dying.
+A prototype made in 4 days written in MoonScript. It's a simple game about juggling balls!
 
 **[[Download](https://a327ex.itch.io/jugglrx-prototype)]** **[[Source](https://github.com/a327ex/JUGGLRX-prototype)]** *(click image below to watch gameplay)*
 
