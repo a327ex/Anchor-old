@@ -1,6 +1,6 @@
 # Anchor
 
-Anchor is a Lua/MoonScript game development engine built on top of LÖVE. Its goal is to serve as a good engine for programmers who like Lua, are mostly developing their games solo, and want to release their games on Steam and on the Web. It's currently being built so use at your own peril!
+Anchor is a Lua/MoonScript game development engine built on top of LÖVE. Its goal is to serve as a good engine for programmers who like Lua, are mostly developing 2D games, and want to release their games on Steam and on the Web. It's currently being built so use at your own peril!
 
 <br>
 
