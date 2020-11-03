@@ -165,9 +165,17 @@ end
 -- t = {{id = 1}, {id = 1}, {id = 2}}
 -- table.delete(t, function(v) return v.id == 1 end) -> {{id = 2}}
 function table.delete(t, v)
-  for i = #t, 1, -1 do
-    if v == t[i] then
-      table.remove(t, i)
+  if type(v) == 'function' then
+    for i = #t, 1, -1 do
+      if v(t[i]) then
+        table.remove(t, i)
+      end
+    end
+  else
+    for i = #t, 1, -1 do
+      if v == t[i] then
+        table.remove(t, i)
+      end
     end
   end
   return t

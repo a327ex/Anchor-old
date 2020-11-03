@@ -68,7 +68,7 @@ function Group:update(dt)
     if self.objects[i].dead then
       if self.objects[i].destroy then self.objects[i]:destroy() end
       self.objects.by_id[self.objects[i].id] = nil
-      if moonscript then table.delete(self.objects.by_class[self.objects[i].__class], function(v) return v.id == object.id end)
+      if moonscript then table.delete(self.objects.by_class[self.objects[i].__class], function(v) return v.id == self.objects[i].id end)
       else table.delete(self.objects.by_class[getmetatable(self.objects[i])], function(v) return v.id == object.id end) end
       table.remove(self.objects, i)
     end

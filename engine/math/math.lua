@@ -159,8 +159,8 @@ end
 -- s = math.sign(-10) -> -1
 -- s = math.sign(0) -> 0 
 function math.sign(v)
-  if n > 0 then return 1
-  elseif n < 0 then return -1
+  if v > 0 then return 1
+  elseif v < 0 then return -1
   else return 0 end
 end
 

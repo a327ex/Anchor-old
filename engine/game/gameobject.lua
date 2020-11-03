@@ -273,11 +273,19 @@ game_object_methods.apply_impulse = function(self, fx, fy)
 end
 
 
+-- Applies an instantaneous amount of angular force to the object
+-- self:apply_angular_impulse(8*math.pi)
+game_object_methods.apply_angular_impulse = function(self, f)
+  self.body:applyAngularImpulse(f)
+  return self
+end
+
+
 -- Applies a continuous amount of force to the object
 -- self:apply_force(100*math.cos(angle), 100*math.sin(angle))
-game_object_methods.apply_force = function(self, fx, fy)
+game_object_methods.apply_force = function(self, fx, fy, x, y)
   if self.body then
-    self.body:applyForce(fx, fy)
+    self.body:applyForce(fx, fy, x, y)
   else
     self.a.x = self.a.x + fx
     self.a.y = self.a.y + fy
@@ -308,7 +316,6 @@ game_object_methods.set_gravity_scale = function(self, v)
   self.body:setGravityScale(v)
   return self
 end
-
 
 
 -- Moves this object towards another object

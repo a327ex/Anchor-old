@@ -16,6 +16,11 @@ input.actions = {}
 input.textinput_buffer = ""
 
 
+function input.set_mouse_grabbed(v)
+  love.mouse.setGrabbed(v)
+end
+
+
 function input.update()
   for _, action in ipairs(input.actions) do
     input[action].pressed = false
