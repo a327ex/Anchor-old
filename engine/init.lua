@@ -41,27 +41,34 @@ if not path:find("init") then
 end
 
 function engine_run(config)
-  love.filesystem.setIdentity(config.game_name)
+  if not web then
+    love.filesystem.setIdentity(config.game_name)
 
-  local _, _, flags = love.window.getMode()
-  local window_width, window_height = love.window.getDesktopDimensions(flags.display)
-  if config.window_width ~= 'max' then window_width = config.window_width end
-  if config.window_height ~= 'max' then window_height = config.window_height end
+    local _, _, flags = love.window.getMode()
+    local window_width, window_height = love.window.getDesktopDimensions(flags.display)
+    if config.window_width ~= 'max' then window_width = config.window_width end
+    if config.window_height ~= 'max' then window_height = config.window_height end
 
-  local limits = love.graphics.getSystemLimits()
-  local anisotropy = limits.anisotropy
-  msaa = limits.canvasmsaa
-  if config.msaa ~= 'max' then msaa = config.msaa end
-  if config.anisotropy ~= 'max' then anisotropy = config.anisotropy end
+    local limits = love.graphics.getSystemLimits()
+    local anisotropy = limits.anisotropy
+    msaa = limits.canvasmsaa
+    if config.msaa ~= 'max' then msaa = config.msaa end
+    if config.anisotropy ~= 'max' then anisotropy = config.anisotropy end
 
-  gw, gh = config.game_width or 1920, config.game_height or 1080
-  sx, sy = window_width/(config.game_width or 1920), window_height/(config.game_height or 1080)
-  ww, wh = window_width, window_height
+    gw, gh = config.game_width or 1920, config.game_height or 1080
+    sx, sy = window_width/(config.game_width or 1920), window_height/(config.game_height or 1080)
+    ww, wh = window_width, window_height
 
-  love.window.setMode(window_width, window_height, {
-    fullscreen = config.fullscreen, borderless = config.borderless, resizable = config.resizable, vsync = config.vsync, msaa = msaa or 0, display = config.display
-  })
-  love.window.setTitle(config.game_name)
+    love.window.setMode(window_width, window_height, {
+      fullscreen = config.fullscreen, borderless = config.borderless, resizable = config.resizable, vsync = config.vsync, msaa = msaa or 0, display = config.display
+    })
+    love.window.setTitle(config.game_name)
+
+  else
+    gw, gh = config.game_width or 1920, config.game_height or 1080
+    sx, sy = 2, 2
+    ww, wh = 960, 540
+  end
 
   love.graphics.setBackgroundColor(0, 0, 0, 1)
   love.graphics.setColor(1, 1, 1, 1)
@@ -86,11 +93,17 @@ function engine_run(config)
 
   if love.timer then love.timer.step() end
 
-  local _, _, flags = love.window.getMode()
-  local fixed_dt = 1/flags.refreshrate
+  if not web then
+    _, _, flags = love.window.getMode()
+    fixed_dt = 1/flags.refreshrate
+  else fixed_dt = 1/60 end
+
   local accumulator = fixed_dt
   local dt = 0
-  frame, time, refresh_rate = 0, 0, flags.refreshrate
+  frame, time = 0, 0
+
+  if not web then refresh_rate = 1/flags.refreshrate
+  else refresh_rate = 60 end
 
   return function()
     if love.event then

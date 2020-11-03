@@ -356,7 +356,7 @@ function Instance:_play(options)
 	if options and options.loop ~= nil then
 		self.loop = options.loop
 	end
-	self._source:seek(options and options.seek or 0)
+	if not web then self._source:seek(options and options.seek or 0) end
 	self._source:play()
 end
 
