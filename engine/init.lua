@@ -8,11 +8,9 @@ if not path:find("init") then
   require(path .. ".system")
   require(path .. ".datastructures.graph")
   require(path .. ".datastructures.grid")
-  require(path .. ".game.game")
   require(path .. ".game.steering")
   require(path .. ".game.gameobject")
   require(path .. ".game.group")
-  require(path .. ".game.state")
   require(path .. ".graphics.animation")
   require(path .. ".graphics.camera")
   require(path .. ".graphics.canvas")
@@ -102,7 +100,7 @@ function engine_run(config)
   local dt = 0
   frame, time = 0, 0
 
-  if not web then refresh_rate = 1/flags.refreshrate
+  if not web then refresh_rate = flags.refreshrate
   else refresh_rate = 60 end
 
   return function()

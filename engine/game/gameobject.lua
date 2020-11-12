@@ -71,15 +71,19 @@ game_object_methods.update_game_object = function(self, dt)
 
   if self.steerable and self.steering_enabled then
     local steering_force = self:calculate_steering_force(dt)
-    local a = steering_force:div(self.mass)
-    self.v:add(a:mul(dt))
+    local applied_force = self:calculate_applied_force(dt)
+    local sa = steering_force:div(self.mass)
+    local aa = applied_force:div(self.mass)
+    self.v:add(sa:mul(dt))
     self.v:truncate(self.max_v)
-    self:set_velocity(self.v.x, self.v.y)
+    self.av:add(aa:mul(dt))
+    self:set_velocity(self.v.x + self.av.x, self.v.y + self.av.y)
     if self.v:length_squared() > 0.00001 then
       self.heading = self.v:clone():normalize()
       self.side = self.heading:perpendicular()
     end
     if steering_force:length_squared() < 10 then self.v:mul(self.damping*dt) end
+    self.av:mul(self.adamping*dt)
   end
 
   self:update_position()
@@ -346,7 +350,30 @@ end
 game_object_methods.move_towards_mouse = function(self, speed, max_time)
   if max_time then speed = self:distance_to_mouse()/max_time end
   local r = self:angle_to_mouse()
+  print(r)
   self:set_velocity(speed*math.cos(r), speed*math.sin(r))
+  return self
+end
+
+
+-- Same as move_towards_mouse but does so only on the x axis
+-- self:move_towards_mouse_horizontally(nil, 1)
+game_object_methods.move_towards_mouse_horizontally = function(self, speed, max_time)
+  if max_time then speed = self:distance_to_mouse()/max_time end
+  local r = self:angle_to_mouse()
+  local vx, vy = self:get_velocity()
+  self:set_velocity(speed*math.cos(r), vy)
+  return self
+end
+
+
+-- Same as move_towards_mouse but does so only on the y axis
+-- self:move_towards_mouse_vertically(nil, 1)
+game_object_methods.move_towards_mouse_vertically = function(self, speed, max_time)
+  if max_time then speed = self:distance_to_mouse()/max_time end
+  local r = self:angle_to_mouse()
+  local vx, vy = self:get_velocity()
+  self:set_velocity(vx, speed*math.sin(r))
   return self
 end
 
@@ -465,6 +492,7 @@ game_object_methods.set_as_steerable = function(self, max_v, max_f, max_turn_rat
   self.steerable = true
   self.steering_enabled = true
   self.v = Vector()
+  self.av = Vector()
   self.heading = Vector()
   self.side = Vector()
   self.mass = 1
@@ -473,6 +501,7 @@ game_object_methods.set_as_steerable = function(self, max_v, max_f, max_turn_rat
   self.max_turn_rate = max_turn_rate or 2*math.pi
   self.turn_multiplier = turn_multiplier or 2
   self.damping = 0.95*refresh_rate
+  self.adamping = 0.8*refresh_rate
   self.seek_f = Vector()
   self.flee_f = Vector()
   self.pursuit_f = Vector()
@@ -484,6 +513,7 @@ game_object_methods.set_as_steerable = function(self, max_v, max_f, max_turn_rat
   self.separation_f = Vector()
   self.alignment_f = Vector()
   self.cohesion_f = Vector()
+  self.apply_force_f = Vector()
 end
 
 
@@ -508,6 +538,23 @@ game_object_methods.calculate_steering_force = function(self, dt)
   self.aligning = false
   self.cohesing = false
   return steering_force:truncate(self.max_f)
+end
+
+
+game_object_methods.calculate_applied_force = function(self, dt)
+  local applied_force = Vector(0, 0)
+  if self.applying_force then applied_force:add(self.apply_force_f) end
+  self.applying_force = false
+  return applied_force
+end
+
+
+-- Applies force f to the entity at the given angle r
+-- This plays along with steering behaviors, whereas the apply_force function simply applies it directly to the body and doesn't work when steering behaviors are enabled
+-- self:apply_steering_force(100, math.pi/4)
+game_object_methods.apply_steering_force = function(self, f, r)
+  self.applying_force = true
+  self.apply_force_f:set(f*math.cos(r), f*math.sin(r))
 end
 
 

@@ -190,7 +190,7 @@ local LN210 = 10*math.log(2)
 -- TODO: fix this since it doesn't work properly for some reason
 -- Lerp corrected for usage with delta time, see more here https://www.construct.net/en/blogs/ashleys-blog-2/using-lerp-delta-time-924
 -- f is a value between 0 and 1 that corresponds to how much of the distance between src and dst will be covered per second, regardless of frame rate.
--- math.lerp_dt(0.25, dt, self.x, self.x + 100) -> will cover 25% of the distance between self.x and self.x + 100 per second
+-- math.lerp_dt(0.25, dt, self.x, self.x + 100) -> will cover 75% of the distance between self.x and self.x + 100 per second
 function math.lerp_dt(f, dt, src, dst)
   return math.lerp((1-f^dt), src, dst)
 end

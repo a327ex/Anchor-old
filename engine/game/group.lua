@@ -1,33 +1,28 @@
 -- The Group class is responsible for object management.
--- As mentioned in the state file, you'll probably at least want to use this class if not Game/State ones, as it provides access to a lot of functionality from the engine.
--- A common usage is to create different groups for different "layers" of behavior in the game, and also to create them inside one of your states, for instance:
+-- A common usage is to create different groups for different "layers" of behavior in the game:
 --[[
-Arena = Object:extend()
-Arena:implement(State)
-function Arena:new(name, opts) self:new_state(name, opts) end
-
-function Arena:on_enter()
-  self.main = Group(game.camera):set_as_physics_world(192)
-  self.effects = Group(game.camera)
-  self.floor = Group(game.camera)
-  self.ui = Group()
+function init()
+  main = Group(camera):set_as_physics_world(192)
+  effects = Group(camera)
+  floor = Group(camera)
+  ui = Group()
 end
 
 
-function Arena:update(dt)
-  self.main:update(dt)
-  self.floor:update(dt)
-  self.effects:update(dt)
-  self.ui:update(dt)
+function update(dt)
+  main:update(dt)
+  floor:update(dt)
+  effects:update(dt)
+  ui:update(dt)
 end
 
 
-function Arena:draw()
-  self.floor:draw()
-  self.main:sort_by_y()
-  self.main:draw()
-  self.effects:draw()
-  self.ui:draw()
+function draw()
+  floor:draw()
+  main:sort_by_y()
+  main:draw()
+  effects:draw()
+  ui:draw()
 end
 ]]--
 
@@ -36,7 +31,7 @@ end
 -- If you need an object to collide with another physically then they have to use the same physics world, and thus also the same group.
 -- The effects and floor groups are purely visual, one for drawing things on the floor (it's a top-down-ish 2.5D game), like shadows, and the other for drawing visual effects on top of everything else.
 -- As you can see in the draw function, floor is drawn first and effects is drawn after all gameplay objects.
--- These three groups above also all use the game's main camera instance as their drawing targets since we want gameplay objects, floor and visual effects to be drawn according to the camera's transform.
+-- These three groups above also all use the game's main camera instance as their targets since we want gameplay objects, floor and visual effects to be drawn according to the camera's transform.
 -- Finally, the UI group is the one that doesn't have a camera attached to it because we want its objects to be drawn in fixed locations on the screen.
 -- And this group is also drawn last because generally UI elements go on top of literally everything else.
 Group = Object:extend()
@@ -69,7 +64,7 @@ function Group:update(dt)
       if self.objects[i].destroy then self.objects[i]:destroy() end
       self.objects.by_id[self.objects[i].id] = nil
       if moonscript then table.delete(self.objects.by_class[self.objects[i].__class], function(v) return v.id == self.objects[i].id end)
-      else table.delete(self.objects.by_class[getmetatable(self.objects[i])], function(v) return v.id == object.id end) end
+      else table.delete(self.objects.by_class[getmetatable(self.objects[i])], function(v) return v.id == self.objects[i].id end) end
       table.remove(self.objects, i)
     end
   end
@@ -184,10 +179,19 @@ end
 
 
 -- Returns all objects of a specific class
--- group:get_object_by_class(Star) -> all objects of class Star in a table
+-- group:get_objects_by_class(Star) -> all objects of class Star in a table
 function Group:get_objects_by_class(class)
   if not self.objects.by_class[class] then return {}
   else return table.shallow_copy(self.objects.by_class[class]) end
+end
+
+
+-- Returns all objects of the specified classes
+-- group:get_objects_by_classes({Star, Enemy, Projectile}) -> all objects of class Star, Enemy or Projectile in a table
+function Group:get_objects_by_classes(class_list)
+  local objects = {}
+  for _, class in ipairs(class_list) do table.insert(objects, self:get_objects_by_class(class)) end
+  return table.flatten(objects, true)
 end
 
 
