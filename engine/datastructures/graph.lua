@@ -68,7 +68,46 @@ function Graph:remove_edge(node1, node2)
       break
     end
   end
-  self:set_edges()
+  self:_set_edges()
+end
+
+
+-- graph = Graph()
+-- graph:add_node(1)
+-- graph:add_node('node_2')
+-- graph:add_node('node_3')
+-- graph:add_edge(1, 'node_2')
+-- graph:add_edge('node_2', 'node_3')
+-- path = graph:shortest_path_bfs(1, 'node_3')
+-- print(path) -> {1, 'node_2', 'node_3'}
+function Graph:shortest_path_bfs(node1, node2)
+  local path = {}
+  local visited = {}
+  local queue = {}
+  table.insert(queue, node1)
+  visited[node1] = true
+
+  while #queue > 0 do
+    local node = table.remove(queue, 1)
+    if node == node2 then
+      local linear_path = {}
+      local current_node = node2
+      table.insert(linear_path, 1, current_node)
+      while current_node ~= node1 do
+        current_node = path[current_node]
+        table.insert(linear_path, 1, current_node)
+      end
+      return linear_path
+    end
+
+    for _, neighbor in ipairs(self.adjacency_list[node]) do
+      if not visited[neighbor] then
+        path[neighbor] = node
+        visited[neighbor] = true
+        table.insert(queue, neighbor)
+      end
+    end
+  end
 end
 
 

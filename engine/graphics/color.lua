@@ -32,3 +32,60 @@ end
 function Color:clone()
   return Color(self.r, self.g, self.b, self.a)
 end
+
+
+function Color:lighten(v)
+  local h, s, l = self:_to_hsl()
+  l = l + v
+  self.r, self.g, self.b = self:_to_rgb(h, s, l)
+  return self
+end
+
+
+function Color:darken(v)
+  local h, s, l = self:_to_hsl()
+  l = l - v
+  self.r, self.g, self.b = self:_to_rgb(h, s, l)
+  return self
+end
+
+
+function Color:fade(v)
+  self.a = self.a - v
+  return self
+end
+
+
+function Color:_to_hsl()
+  local max, min = math.max(self.r, self.g, self.b), math.min(self.r, self.g, self.b)
+  local h, s, l
+  l = (max + min)/2
+  if max == min then h, s = 0, 0
+  else
+    local d = max - min
+    if l > 0.5 then s = d/(2 - max - min) else s = d/(max + min) end
+    if max == self.r then
+      h = (self.g - self.b)/d
+      if self.g < self.b then h = h + 6 end
+    elseif max == self.g then h = (self.b - self.r)/d + 2
+    elseif max == self.b then h = (self.r - self.g)/d + 4 end
+    h = h/6
+  end
+  return h, s, l
+end
+
+
+function Color:_to_rgb(h, s, l)
+  if s == 0 then return l, l, l end
+  local function to(p, q, t)
+    if t < 0 then t = t + 1 end
+    if t > 1 then t = t - 1 end
+    if t < .16667 then return p + (q - p)*6*t end
+    if t < .5 then return q end
+    if t < .66667 then return p + (q - p)*(.66667 - t)*6 end
+    return p
+  end
+  local q = l < .5 and l*(1 + s) or l + s - l*s
+  local p = 2*l - q
+  return to(p, q, h + .33334), to(p, q, h), to(p, q, h - .33334)
+end

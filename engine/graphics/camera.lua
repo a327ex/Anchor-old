@@ -94,6 +94,7 @@ function Camera:new(x, y, w, h)
   self.x, self.y = x, y
   self.w, self.h = w or gw, h or gh
   self.r, self.sx, self.sy = 0, 1, 1
+  self.timer = Timer()
   self.mouse = Vector(0, 0)
   self.last_mouse = Vector(0, 0)
   self.mouse_dt = Vector(0, 0)
@@ -101,6 +102,7 @@ function Camera:new(x, y, w, h)
   self.spring = {x = Spring(), y = Spring()}
   self.lerp = Vector(1, 1)
   self.lead = Vector(1, 1)
+  self.impulse = Vector(0, 0)
   self.follow_style = "no_deadzone"
   self.shake_amount = Vector(0, 0)
   self.last_shake_amount = Vector(0, 0)
@@ -179,6 +181,7 @@ end
 
 
 function Camera:update(dt)
+  self.timer:update(dt)
   self.mouse.x, self.mouse.y = self:get_mouse_position()
   self.mouse_dt.x, self.mouse_dt.y = self.mouse.x - self.last_mouse.x, self.mouse.y - self.last_mouse.y
   self.shake_amount:set(0, 0)
@@ -198,6 +201,9 @@ function Camera:update(dt)
   self.x, self.y = self.x - self.last_shake_amount.x, self.y - self.last_shake_amount.y
   self.x, self.y = self.x + self.shake_amount.x, self.y + self.shake_amount.y
   self.last_shake_amount:set(self.shake_amount)
+  self.x = self.x + self.impulse.x*dt
+  self.y = self.y + self.impulse.y*dt
+  self.impulse:mul(0.9*refresh_rate*dt)
 
   if self.bound then
     self.x = math.min(math.max(self.x, self.bounds_min.x + self.w/2), self.bounds_max.x - self.w/2)
@@ -352,4 +358,9 @@ end
 function Camera:angle_to_mouse(x, y)
   local mx, my = self:get_mouse_position()
   return math.angle(x, y, mx, my)
+end
+
+
+function Camera:apply_impulse(f, r)
+  self.impulse:set(f*math.cos(r), f*math.sin(r))
 end

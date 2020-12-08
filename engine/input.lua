@@ -21,6 +21,11 @@ function input.set_mouse_grabbed(v)
 end
 
 
+function input.set_mouse_visible(v)
+  love.mouse.setVisible(v)
+end
+
+
 function input.update()
   for _, action in ipairs(input.actions) do
     input[action].pressed = false

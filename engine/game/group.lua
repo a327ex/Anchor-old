@@ -135,7 +135,7 @@ function Group:get_mouse_position()
     return self.camera.mouse.x, self.camera.mouse.y
   else
     local mx, my = love.mouse.getPosition()
-    return mx/config.game_sx, my/config.game_sy
+    return mx/sx, my/sy
   end
 end
 

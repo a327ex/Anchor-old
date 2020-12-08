@@ -70,6 +70,14 @@ function Polygon:inflate(s)
 end
 
 
+-- Moves the polygon directly to the given position.
+-- polygon:move_to(20, 20) -> moves the polygon to position 20, 20
+function Polygon:move_to(x, y)
+  self:translate(x - self.x, y - self.y)
+  self.x, self.y = x, y
+end
+
+
 -- Translates the polygon by the given amount.
 -- polygon:translate(20, 20) -> moves the polygon by 20, 20 units
 function Polygon:translate(x, y)

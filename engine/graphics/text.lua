@@ -34,24 +34,11 @@ text = Text('[yellow]This text is yellow [shaking]while this text is shaking []a
 -- text - the reference to the text object
 -- The update function also takes in dt as the second argument.
 Text = Object:extend()
-function Text:new(tagged_text, text_tags, font)
+function Text:new(text_data, text_tags)
   self.timer = Timer()
-  self.font = font or love.graphics.getFont()
-  self.tagged_text = tagged_text
+  self.text_data = text_data
   self.text_tags = text_tags
-  self.raw_text, self.characters = self:parse(tagged_text)
-  self.line_height_multiplier = 1
-  self.line_count = 1
-  self:format_text()
-  for i, c in ipairs(self.characters) do
-    for k, v in pairs(self.text_tags) do
-      for _, tag in ipairs(c.tags) do
-        if tag == k then
-          if v.actions.init then v.actions.init(c, i, self) end
-        end
-      end
-    end
-  end
+  self:set_text(text_data)
   return self
 end
 
@@ -59,11 +46,15 @@ end
 function Text:update(dt)
   self.timer:update(dt)
   self:format_text()
-  for i, c in ipairs(self.characters) do
-    for k, v in pairs(self.text_tags) do
-      for _, tag in ipairs(c.tags) do
-        if tag == k then
-          if v.actions.update then v.actions.update(c, dt, i, self) end
+  for _, line in ipairs(self.lines) do
+    for i, c in ipairs(line.characters) do
+      for k, v in pairs(self.text_tags) do
+        for _, tag in ipairs(c.tags) do
+          if tag == k then
+            if v.actions.update then 
+              v.actions.update(c, dt, i, self)
+            end
+          end
         end
       end
     end
@@ -71,95 +62,69 @@ function Text:update(dt)
 end
 
 
--- Draws the text object at the specified location.
--- Unlike all other constructs in the engine, this x, y position is not the text's center, but its top-left position.
+-- Draws the text object centered at the specified location.
 function Text:draw(x, y)
-  for i, c in ipairs(self.characters) do
-    for k, v in pairs(self.text_tags) do
-      for _, tag in ipairs(c.tags) do
-        if tag == k then
-          if v.actions.draw then v.actions.draw(c, i, self) end
+  for _, line in ipairs(self.lines) do
+    for i, c in ipairs(line.characters) do
+      for k, v in pairs(self.text_tags) do
+        for _, tag in ipairs(c.tags) do
+          if tag == k then
+            if v.actions.draw then
+              v.actions.draw(c, i, self)
+            end
+          end
         end
       end
+      graphics.print(c.character, line.font, x + c.x - self.w/2, y + c.y - self.h/2, c.r or 0, c.sx or 1, c.sy or c.sx or 1, c.ox or 0, c.oy or 0)
+      graphics.set_color(white)
     end
-    graphics.print(c.character, self.font, x + c.x, y + c.y, c.r or 0, c.sx or 1, c.sy or c.sx or 1, c.ox or 0, c.oy or 0)
-    graphics.set_color(white)
   end
 end
 
 
 function Text:format_text()
-  if self.wrap_width then self.w = self.wrap_width
-  else self.w = self.font:get_text_width(self.raw_text) end
-
-  local x = 0
-  local line, col = 1, 1
-  local last_space_index = 1
-  for i, c in ipairs(self.characters) do
-    if c.character == " " then
-      c.line = line
-      c.col = col
-      c.x = x
-      c.y = self.font.h*(line-1)
-      last_space_index = i
-      col = col + 1
-      x = x + self.font:get_text_width(c.character)
-    elseif c.character == "\n" then
-      c.line = line
-      c.col = col
-      c.x = x
-      c.y = self.font.h*(line-1)
-      line = line + 1
-      col = 1
-      x = 0
-    else
-      if x + self.font:get_text_width(c.character) > self.w then
-        line = line + 1
-        col = 1
-        x = 0
-        self.characters[last_space_index].character = "\n"
-        for j = last_space_index+1, i do
-          self.characters[j].line = line
-          self.characters[j].col = col
-          self.characters[j].x = x
-          self.characters[j].y = self.font.h*(line-1)
-          x = x + self.font:get_text_width(self.characters[j].character)
-          col = col + 1
-        end
-        c.line = line
-        c.col = col
-        c.x = x
-        c.y = self.font.h*(line-1)
-        x = x + self.font:get_text_width(c.character)
-      else
-        c.line = line
-        c.col = col
-        c.x = x
-        c.y = self.font.h*(line-1)
-        col = col + 1
-        x = x + self.font:get_text_width(c.character)
-      end
+  self.w = 0
+  for i, line in ipairs(self.lines) do
+    local line_width = math.max(line.font:get_text_width(line.raw_text), line.alignment_width or 0)
+    if line_width > self.w then
+      self.w = line_width
     end
   end
-  self.h = self.font.h*line*self.line_height_multiplier
-  self.line_count = line
 
-  if self.justify == "right" then
-    for i = 1, self.line_count do
-      local characters = self:get_characters_in_line(i)
-      local line_width = 0
-      for _, c in ipairs(characters) do line_width = line_width + self.font:get_text_width(c.character) end
-      local left_over_width = self.w - line_width
-      for _, c in ipairs(characters) do c.x = c.x + left_over_width end
+  local x, y = 0, 0
+  for j, line in ipairs(self.lines) do
+    local h = (line.font.h*(line.height_multiplier or 1) + (line.height_offset or 0))*(line.sy or 1)
+    for i, c in ipairs(line.characters) do
+      c.x = x
+      c.y = y
+      c.sx = line.sx or 1
+      c.sy = line.sy or 1
+      x = x + line.font:get_text_width(c.character)
     end
-  elseif self.justify == "center" then
-    for i = 1, self.line_count do
-      local characters = self:get_characters_in_line(i)
-      local line_width = 0
-      for _, c in ipairs(characters) do line_width = line_width + self.font:get_text_width(c.character) end
-      local left_over_width = self.w - line_width
+    y = y + h
+    x = 0
+  end
+  self.h = y
+
+  for i, line in ipairs(self.lines) do
+    if line.alignment == "right" then
+      local text_width = 0
+      for _, c in ipairs(line.characters) do text_width = text_width + line.font:get_text_width(c.character) end
+      local left_over_width = self.w - (line.alignment_width or text_width)
+      for _, c in ipairs(line.characters) do c.x = c.x + left_over_width end
+
+    elseif line.alignment == "center" then
+      local text_width = 0
+      for _, c in ipairs(line.characters) do text_width = text_width + line.font:get_text_width(c.character) end
+      local left_over_width = self.w - (line.alignment_width or text_width)
+      for _, c in ipairs(line.characters) do c.x = c.x + left_over_width/2 end
+
+    elseif line.alignment == "justified" then
+      local text_width = 0
+      for _, c in ipairs(line.characters) do text_width = text_width + line.font:get_text_width(c.character) end
+      local left_over_width = self.w - (line.alignment_width or text_width)
       local spaces_count = 0
-      for _, c in ipairs(characters) do
+      for _, c in ipairs(line.characters) do
         if c.character == " " then
           spaces_count = spaces_count + 1
         end
@@ -179,84 +144,110 @@ function Text:format_text()
 end
 
 
-function Text:get_characters_in_line(line)
-  local characters = {}
-  for _, c in ipairs(self.characters) do
-    if c.line == line then table.insert(characters, c) end
-  end
-  return characters
-end
-
-
-function Text:parse(text)
-  local tags = {}
-  for i, tags_text, j in text:gmatch("()%[(.-)%]()") do
-    if tags_text == "" then
-      table.insert(tags, {i = tonumber(i), j = tonumber(j)-1})
-    else
-      local local_tags = {}
-      for tag in tags_text:gmatch("[%w_]+") do table.insert(local_tags, tag) end
-      table.insert(tags, {i = tonumber(i), j = tonumber(j)-1, tags = local_tags})
-    end
-  end
-
-  local characters = {}
-  local current_tags = nil
-  local current_line, current_col = 1, 1
-  for i = 1, #text do
-    local c = text:sub(i, i)
-    local inside_tags = false
-    for _, tag in ipairs(tags) do
-      if i >= tag.i and i <= tag.j then
-        inside_tags = true
-        current_tags = tag.tags
-        break
+function Text:parse(text_data)
+  for _, line in ipairs(text_data) do
+    local tags = {}
+    for i, tags_text, j in line.text:gmatch("()%[(.-)%]()") do
+      if tags_text == "" then
+        table.insert(tags, {i = tonumber(i), j = tonumber(j)-1})
+        line.tags = tags
+      else
+        local local_tags = {}
+        for tag in tags_text:gmatch("[%w_]+") do table.insert(local_tags, tag) end
+        table.insert(tags, {i = tonumber(i), j = tonumber(j)-1, tags = local_tags})
+        line.tags = tags
       end
     end
-    if not inside_tags then
-      table.insert(characters, {character = c, visible = true, tags = current_tags or {}})
+    if not line.tags then line.tags = {} end
+  end
+
+  for _, line in ipairs(text_data) do
+    line.characters = {}
+    local current_tags = nil
+    for i = 1, #line.text do
+      local c = line.text:sub(i, i)
+      local inside_tags = false
+      for _, tag in ipairs(line.tags) do
+        if i >= tag.i and i <= tag.j then
+          inside_tags = true
+          current_tags = tag.tags
+          break
+        end
+      end
+      if not inside_tags then
+        table.insert(line.characters, {character = c, visible = true, tags = current_tags or {}})
+      end
     end
   end
 
-  local raw_text = ""
-  for _, character in ipairs(characters) do
-    raw_text = raw_text .. character.character
+  for _, line in ipairs(text_data) do
+    local raw_text = ""
+    for _, character in ipairs(line.characters) do
+      raw_text = raw_text .. character.character
+    end
+    line.raw_text = raw_text
   end
-  return raw_text, characters
+
+  return text_data
 end
 
 
--- Sets the text's wrap width.
--- Any text that goes over this width will automatically be placed on the next line.
-function Text:set_wrap_width(wrap_width)
-  self.wrap_width = wrap_width
+-- Sets new text.
+-- Reapplies all modifications (wrap width, justification, etc).
+function Text:set_text(text_data)
+  self.lines = self:parse(text_data)
+  self:format_text()
+  for _, line in ipairs(self.lines) do
+    for i, c in ipairs(line.characters) do
+      for k, v in pairs(self.text_tags) do
+        for _, tag in ipairs(c.tags) do
+          if tag == k then
+            if v.actions.init then
+              v.actions.init(c, i, self)
+            end
+          end
+        end
+      end
+    end
+  end
+end
+
+
+-- Sets the line's alignment width.
+-- This is used to align the text according to the alignment option
+-- For instance, if the alignment width is 200 and the alignment is 'right', then the right edge used for this alignment will be 200 units to the right
+function Text:set_alignment_width(line, alignment_width)
+  self.alignment_width = alignment_width
+  self:format_text()
   return self
 end
 
 
--- Sets the text's line height multiplier.
--- Lines are automatically placed vertically using the font's height for spacing, but you can increase or decrease this distance by setting this multiplier.
-function Text:set_line_height_multiplier(m)
-  self.line_height_multiplier = m or 1
+-- Sets the text's line height.
+-- Lines are automatically placed vertically using the font's height for spacing, but you can increase or decrease this distance by setting these values.
+function Text:set_line_height_data(line, offset, multiplier)
+  self.lines[line].height_offset = offset or 0
+  self.lines[line].height_multiplier = multiplier or 1
+  self:format_text()
   return self
 end
 
 
 -- Sets the text's font. By default texts use the global font.
-function Text:set_font(font)
-  self.font = font
+function Text:set_font(line, font)
+  self.lines[line].font = font
+  self:format_text()
   return self
 end
 
 
--- Sets the justify behavior for the text.
--- Possible behaviors are: 'left', 'right', 'center' (justified)
-function Text:set_justify(justify)
-  self.justify = justify or "left"
+-- Sets the alignment behavior for the given line.
+-- Possible behaviors are: 'right', 'center' and 'justified'
+function Text:set_alignment(line, alignment)
+  self.lines[line].alignment = alignment
+  self:format_text()
   return self
 end
-
-
 
 
 -- The text tag objects to be used with text instances.

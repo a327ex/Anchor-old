@@ -70,14 +70,17 @@ game_object_methods.update_game_object = function(self, dt)
   self.timer:update(dt)
 
   if self.steerable and self.steering_enabled then
+
     local steering_force = self:calculate_steering_force(dt)
     local applied_force = self:calculate_applied_force(dt)
+    local applied_impulse = self:calculate_applied_impulse(dt)
     local sa = steering_force:div(self.mass)
     local aa = applied_force:div(self.mass)
+    local ai = applied_impulse:div(self.mass)
     self.v:add(sa:mul(dt))
     self.v:truncate(self.max_v)
     self.av:add(aa:mul(dt))
-    self:set_velocity(self.v.x + self.av.x, self.v.y + self.av.y)
+    self:set_velocity(self.v.x + self.av.x + ai.x, self.v.y + self.av.y + ai.y)
     if self.v:length_squared() > 0.00001 then
       self.heading = self.v:clone():normalize()
       self.side = self.heading:perpendicular()
@@ -93,10 +96,10 @@ game_object_methods.update_game_object = function(self, dt)
       self.shape.vertices = {self.body:getWorldPoints(self.fixture:getShape():getPoints())}
       self.shape:get_centroid()
     end
-    self.shape.x, self.shape.y = self:get_position()
+    self.shape:move_to(self:get_position())
 
     if self.interact_with_mouse then
-      local colliding_with_mouse = self.shape:is_colliding_with_points(self.group:get_mouse_position())
+      local colliding_with_mouse = self.shape:is_colliding_with_point(self.group:get_mouse_position())
       if colliding_with_mouse and not self.colliding_with_mouse then
         self.colliding_with_mouse = true
         if self.on_mouse_enter then self:on_mouse_enter() end
@@ -514,6 +517,7 @@ game_object_methods.set_as_steerable = function(self, max_v, max_f, max_turn_rat
   self.alignment_f = Vector()
   self.cohesion_f = Vector()
   self.apply_force_f = Vector()
+  self.apply_impulse_f = Vector()
 end
 
 
@@ -544,17 +548,44 @@ end
 game_object_methods.calculate_applied_force = function(self, dt)
   local applied_force = Vector(0, 0)
   if self.applying_force then applied_force:add(self.apply_force_f) end
-  self.applying_force = false
   return applied_force
 end
 
 
--- Applies force f to the entity at the given angle r
+game_object_methods.calculate_applied_impulse = function(self, dt)
+  local applied_impulse = Vector(0, 0)
+  if self.applying_impulse then applied_impulse:add(self.apply_impulse_f) end
+  return applied_impulse
+end
+
+
+-- Applies force f to the entity at the given angle r for duration s
 -- This plays along with steering behaviors, whereas the apply_force function simply applies it directly to the body and doesn't work when steering behaviors are enabled
 -- self:apply_steering_force(100, math.pi/4)
-game_object_methods.apply_steering_force = function(self, f, r)
+game_object_methods.apply_steering_force = function(self, f, r, s)
   self.applying_force = true
   self.apply_force_f:set(f*math.cos(r), f*math.sin(r))
+  self.timer:after((s or 0.01)/2, function()
+    self.timer:tween((s or 0.01)/2, self.apply_force_f, {x = 0, y = 0}, math.linear, function()
+      self.applying_force= false
+      self.apply_force_f:set(0, 0)
+    end, 'apply_steering_force_2')
+  end, 'apply_steering_force_1')
+end
+
+
+-- Applies impulse f to the entity at the given angle r for duration s
+-- This plays along with steering behaviors, whereas the apply_impulse function simply applies it directly to the body and doesn't work when steering behaviors are enabled
+-- self:apply_steering_impulse(100, math.pi/4, 0.5)
+game_object_methods.apply_steering_impulse = function(self, f, r, s)
+  self.applying_impulse = true
+  self.apply_impulse_f:set(f*math.cos(r), f*math.sin(r))
+  self.timer:after((s or 0.01)/2, function()
+    self.timer:tween((s or 0.01)/2, self.apply_impulse_f, {x = 0, y = 0}, math.linear, function()
+      self.applying_impulse = false
+      self.apply_impulse_f:set(0, 0)
+    end, 'apply_steering_impulse_2')
+  end, 'apply_steering_impulse_1')
 end
 
 
@@ -619,7 +650,7 @@ end
 -- rs - the radius of the circle
 -- distance - the distance of the circle from this object, the further away the smoother the changes to movement will be
 -- jitter - the amount of jitter to the movement, the higher it is the more abrupt the changes will be
--- self:wander(dt, 50, 100, 20)
+-- self:wander(50, 100, 20)
 game_object_methods.wander = function(self, rs, distance, jitter, weight)
   self.wandering = true
   self.wander_target:add(random:float(-1, 1)*(jitter or 20), random:float(-1, 1)*(jitter or 20))
@@ -892,7 +923,10 @@ game_object_methods.destroy = function(self)
   if self.body then
     if self.fixtures then for _, fixture in ipairs(self.fixtures) do fixture:destroy() end end
     if self.sensors then for _, sensor in ipairs(self.sensors) do sensor:destroy() end end
-    if self.sensor then self.sensor:destroy(); self.sensor = nil end
+    if self.sensor and (self.sensor.type and self.sensor:type() == 'Fixture') then
+      self.sensor:destroy()
+      self.sensor = nil
+    end
     self.fixture:destroy()
     self.body:destroy()
     self.fixture, self.body = nil, nil

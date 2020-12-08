@@ -45,6 +45,17 @@ function Grid:set(x, y, v)
 end
 
 
+-- Applies function f to all grid elements
+-- grid:apply(function(grid, i, j) grid:set(i, j, 0) end) -> sets all elements in the grid to 0
+function Grid:apply(f)
+  for i = 1, self.w do
+    for j = 1, self.h do
+      f(self, i, j)
+    end
+  end
+end
+
+
 -- grid = Grid(10, 5, 0)
 -- print(grid:get(2, 2)) -> 0
 -- grid:set(2, 2, 1)
