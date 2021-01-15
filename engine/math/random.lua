@@ -44,6 +44,13 @@ function Random:table(t)
   return t[self.generator:random(1, #t)]
 end
 
+-- Returns a random value of the table and also removes it.
+-- a = {7, 6, 5, 4}
+-- random:table(a) -> returns either 7, 6, 5 or 4 randomly and removes it from the table as well
+function Random:table_remove(t)
+  return table.remove(t, self.generator:random(1, #t))
+end
+
 
 -- Returns a 1 at the given chance, otherwise returns -1.
 -- random:sign(65) -> returns 1 65% of the time and -1 35% of the time

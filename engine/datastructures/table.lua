@@ -455,3 +455,15 @@ function table.shuffle(t)
   end
   return t
 end
+
+
+-- Merges both tables based on their indexes, if the second table has values in the same indexes as the first table then those will overwrite the first values.
+-- t1 = {1, 2, ['a'] = 3, ['b'] = function() end}
+-- t2 = {nil, 8, 4, 5, ['a'] = 8}
+-- table.merge(t1, t2) -> {1, 8, 4, 5, ['a'] = 8, ['b'] = function() end}
+function table.merge(t1, t2)
+  local out = {}
+  for k, v in pairs(t1) do out[k] = v end
+  for k, v in pairs(t2) do out[k] = v end
+  return out
+end

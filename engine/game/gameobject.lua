@@ -56,9 +56,10 @@ local new_game_object = function(self, group, x, y, opts)
   self.r = 0
   self.sx, self.sy = 1, 1
   for k, v in pairs(opts or {}) do self[k] = v end
-  self.id = random:uid()
+  self.id = (opts and opts.id) or random:uid()
   self.timer = Timer()
   self.group:add_object(self)
+  self.spring = Spring(1)
   return self
 end
 
@@ -68,9 +69,9 @@ local game_object_methods = {}
 
 game_object_methods.update_game_object = function(self, dt)
   self.timer:update(dt)
+  self.spring:update(dt)
 
   if self.steerable and self.steering_enabled then
-
     local steering_force = self:calculate_steering_force(dt)
     local applied_force = self:calculate_applied_force(dt)
     local applied_impulse = self:calculate_applied_impulse(dt)

@@ -22,6 +22,13 @@ function math.coordinates_to_index(i, j, w)
 end
 
 
+-- Returns rectangle vertices based on top-left and bottom-right coordinates
+-- math.to_rectangle_vertices(0, 0, 40, 40) -> vertices for a rectangle centered on 20, 20
+function math.to_rectangle_vertices(x1, y1, x2, y2)
+  return {x1, y1, x2, y1, x2, y2, x1, y2}
+end
+
+
 -- Rotates the point by r radians with ox, oy as pivot.
 -- x, y = math.rotate_point(player.x, player.y, math.pi/4)
 function math.rotate_point(x, y, r, ox, oy)

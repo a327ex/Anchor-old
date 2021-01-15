@@ -76,7 +76,7 @@ end
 
 
 function Color:_to_rgb(h, s, l)
-  if s == 0 then return l, l, l end
+  if s == 0 then return math.clamp(l, 0, 1), math.clamp(l, 0, 1), math.clamp(l, 0, 1) end
   local function to(p, q, t)
     if t < 0 then t = t + 1 end
     if t > 1 then t = t - 1 end
@@ -87,5 +87,5 @@ function Color:_to_rgb(h, s, l)
   end
   local q = l < .5 and l*(1 + s) or l + s - l*s
   local p = 2*l - q
-  return to(p, q, h + .33334), to(p, q, h), to(p, q, h - .33334)
+  return math.clamp(to(p, q, h + .33334), 0, 1), math.clamp(to(p, q, h), 0, 1), math.clamp(to(p, q, h - .33334), 0, 1)
 end

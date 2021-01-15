@@ -178,6 +178,32 @@ function Group:get_object_by_id(id)
 end
 
 
+-- Returns an object after searching for it by property, the property value must be unique among all nodes
+-- group:get_object_by_property('special_id', 347762) -> the object
+function Group:get_object_by_property(key, value)
+  for _, object in ipairs(self.objects) do
+    if object[key] == value then
+      return object
+    end
+  end
+end
+
+
+function Group:get_object_by_properties(keys, values)
+  for _, object in ipairs(self.objects) do
+    local this_is_the_object = true
+    for i = 1, #keys do
+      if object[keys[i]] ~= values[i] then
+        this_is_the_object = false
+      end
+    end
+    if this_is_the_object then
+      return object
+    end
+  end
+end
+
+
 -- Returns all objects of a specific class
 -- group:get_objects_by_class(Star) -> all objects of class Star in a table
 function Group:get_objects_by_class(class)
@@ -199,8 +225,10 @@ end
 -- If object_types is passed in then it only returns object of those classes.
 -- The bounding size is used to select objects quickly and roughly, and then more specific and expensive collision methods are run on the objects returned from that selection.
 -- group:get_objects_in_shape(Rectangle(player.x, player.y, 100, 100, player.r), {Enemy1, Enemy2}) -> all Enemy1 and Enemy2 instances in a 100x100 rotated rectangle around the player
-function Group:get_objects_in_shape(shape, object_types)
+-- group:get_objects_in_shape(Rectangle(player.x, player.y, 100, 100, player.r), {Enemy1, Enemy2}, {object_1, object_2}) -> same as above except excluding object instances object_1 and object_2
+function Group:get_objects_in_shape(shape, object_types, exclude_list)
   local out = {}
+  local exclude_list = exclude_list or {}
   local cx1, cy1 = math.floor((shape.x-shape.w)/self.cell_size), math.floor((shape.y-shape.h)/self.cell_size)
   local cx2, cy2 = math.floor((shape.x+shape.w)/self.cell_size), math.floor((shape.y+shape.h)/self.cell_size)
   for i = cx1, cx2 do
@@ -211,8 +239,10 @@ function Group:get_objects_in_shape(shape, object_types)
         if cell_objects then
           for _, object in ipairs(cell_objects) do
             if object_types then
-              if table.any(object_types, function(v) if moonscript then return object.__class == v else return object:is(v) end end) and object.shape and object.shape:is_colliding_with_shape(shape) then
-                table.insert(out, object)
+              if not table.any(exclude_list, function(v) return v.id == object.id end) then
+                if table.any(object_types, function(v) if moonscript then return object.__class == v else return object:is(v) end end) and object.shape and object.shape:is_colliding_with_shape(shape) then
+                  table.insert(out, object)
+                end
               end
             else
               if object.shape and object:is_colliding_with_shape(shape) then

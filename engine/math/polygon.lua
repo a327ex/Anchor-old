@@ -73,7 +73,7 @@ end
 -- Moves the polygon directly to the given position.
 -- polygon:move_to(20, 20) -> moves the polygon to position 20, 20
 function Polygon:move_to(x, y)
-  self:translate(x - self.x, y - self.y)
+  if self.x and self.y then self:translate(x - self.x, y - self.y) end
   self.x, self.y = x, y
 end
 

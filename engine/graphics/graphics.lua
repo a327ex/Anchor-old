@@ -19,6 +19,21 @@ function graphics.pop()
 end
 
 
+function graphics.translate(x, y)
+  love.graphics.translate(x or 0, y or 0)
+end
+
+
+function graphics.rotate(r)
+  love.graphics.rotate(r or 0)
+end
+
+
+function graphics.scale(sx, sy)
+  love.graphics.scale(sx or 1, sy or sx or 1)
+end
+
+
 function graphics.update(dt)
   for i = #self.debug_queries, 1, -1 do
     local query = self.debug_queries[i]
@@ -83,6 +98,15 @@ end
 -- If line_width is passed in then the rectangle will not be filled and will instead be drawn as a set of lines of the given width.
 function graphics.rectangle(x, y, w, h, rx, ry, color, line_width)
   graphics.shape("rectangle", color, line_width, x - w/2, y - h/2, w, h, rx, ry)
+end
+
+
+-- Draws a rectangle of size w, h centered on x + w/2, y + h/2.
+-- If rx, ry are passed in, then the rectangle will have rounded corners with radius of that size.
+-- If color is passed in then the rectangle will be filled with that color (color is Color object)
+-- If line_width is passed in then the rectangle will not be filled and will instead be drawn as a set of lines of the given width.
+function graphics.rectangle2(x, y, w, h, rx, ry, color, line_width)
+  graphics.shape("rectangle", color, line_width, x, y, w, h, rx, ry)
 end
 
 

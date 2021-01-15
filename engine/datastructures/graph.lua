@@ -17,6 +17,60 @@ function Graph:add_node(node)
 end
 
 
+-- Returns a node after searching for it by property, the property value must be unique among all nodes
+-- graph = Graph()
+-- graph:add_node({id = 1})
+-- graph:add_node({id = 2})
+-- graph:get_node_by_property('id', 1) -> original {id = 1} table
+function Graph:get_node_by_property(key, value)
+  for node, _ in pairs(self.adjacency_list) do
+    if node[key] == value then
+      return node
+    end
+  end
+end
+
+
+-- Runs function f for all nodes in the graph
+-- graph = Graph()
+-- graph:add_node(1)
+-- graph:add_node('node_2')
+-- graph:for_all_nodes(function(node) print(node) end) -> prints 1, 'node_2'
+function Graph:for_all_nodes(f)
+  for _, node in ipairs(self.nodes) do
+    f(node)
+  end
+end
+
+
+-- Runs function f for all edges in the graph
+-- graph = Graph()
+-- graph:add_node(1)
+-- graph:add_node('node_2')
+-- graph:add_node(3)
+-- graph:add_edge(1, 'node_2')
+-- graph:add_edge('node_2', 3)
+-- graph:for_all_edges(function(node1, node2) print(node1, node2) end) -> prints 1, 'node_2'; prints 'node_2', 3
+function Graph:for_all_edges(f)
+  for _, edge in ipairs(self.edges) do
+    f(edge[1], edge[2])
+  end
+end
+
+
+-- Returns a table containing all neighbors of the given node.
+-- graph = Graph()
+-- graph:add_node(1)
+-- graph:add_node('node_2')
+-- graph:add_node(3)
+-- graph:add_edge(1, 'node_2')
+-- graph:add_edge('node_2', 3)
+-- graph:get_node_neighbors('node_2') -> {1, 3}
+function Graph:get_node_neighbors(node)
+  return self.adjacency_list[node]
+end
+
+
 -- graph = Graph()
 -- graph:add_node(1)
 -- graph:remove_node(1)
@@ -44,6 +98,7 @@ end
 -- graph:add_node('node_2')
 -- graph:add_edge(1, 'node_2')
 function Graph:add_edge(node1, node2)
+  if table.any(self.adjacency_list[node1], function(v) return v == node2 end) then return end
   table.insert(self.adjacency_list[node1], node2)
   table.insert(self.adjacency_list[node2], node1)
   self:_set_edges()
@@ -108,6 +163,11 @@ function Graph:shortest_path_bfs(node1, node2)
       end
     end
   end
+end
+
+
+function Graph:get_distance_between_nodes(node1, node2)
+  return self.floyd_dists[node1][node2]
 end
 
 

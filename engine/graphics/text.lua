@@ -21,10 +21,15 @@ shaking_text_tag = TextTag({
   end
 })
 
-text = Text('[yellow]This text is yellow [shaking]while this text is shaking []and this text is normal', {yellow = yellow_text_tag, shaking = shaking_text_tag}, main_font)
+text = Text({
+  {text: '[yellow]This text is yellow', font: some_font, alignment: 'center', height_offset: -10}
+  {text: '[shaking]This text is shaking', font: some_other_font, alignment: 'center', height_multiplier: 1.2}
+  {text: 'This text is normal', font: yet_another_font, alignment: 'center', height_multiplier: 1.2}
+  {text: '[yellow, shaking]This text is yellow and shaking []while this text is normal', font: some_font, alignment: 'center'}
+}, {yellow = yellow_text_tag, shaking = shaking_text_tag})
 ]]--
 
--- There are two main things happening in the example above: first we're create TextTags and then we're creating a text object that uses those tags.
+-- There are two main things happening in the example above: first we're creating TextTags and then we're creating a text object that uses those tags.
 -- The way each tag works is fairly simple: a tag accepts 3 functions, init, update and draw, and each of those functions operates on the text's characters one at a time.
 -- In the example above, the text without tags is 'This text is yellow while this text is shaking and this text is normal'
 -- For each of the characters in that string, different functions will be applied based on what tags were previously applied to it.
@@ -33,11 +38,23 @@ text = Text('[yellow]This text is yellow [shaking]while this text is shaking []a
 -- i - the index of character in the string
 -- text - the reference to the text object
 -- The update function also takes in dt as the second argument.
+--
+-- After we're done creating TextTags, we have to create the actual text object.
+-- The way this is done is by specifying each line of the text object, along with its font, alignment, height multipliers and height offsets.
+-- The first argument (text_data) is a table of tables containing all relevant info:
+-- text - the actual string containing the text to be displayed, along with any tag information
+-- font - the font to be used for the text
+-- alignment (optional) - how the text should align itself, possible values are 'center', 'justified', 'right', if not specified then by default it's 'left'
+-- height_offset (optional) - how many pixels the line below this one should be offset by
+-- height_multiplier (optional) - multiplier over the font's height for placing the line below
+-- The text object itself also has .w and .h which corresponds to the width of the biggest line and height of all lines + offsets, respectively.
+-- If 'alignment_width' is set to a specific line then that line will be automatically set to that width, and if it is the biggest then .w will also be set to that value.
 Text = Object:extend()
 function Text:new(text_data, text_tags)
   self.timer = Timer()
   self.text_data = text_data
   self.text_tags = text_tags
+  self.white = Color(1, 1, 1, 1)
   self:set_text(text_data)
   return self
 end
@@ -63,7 +80,7 @@ end
 
 
 -- Draws the text object centered at the specified location.
-function Text:draw(x, y)
+function Text:draw(x, y, r, sx, sy)
   for _, line in ipairs(self.lines) do
     for i, c in ipairs(line.characters) do
       for k, v in pairs(self.text_tags) do
@@ -75,8 +92,10 @@ function Text:draw(x, y)
           end
         end
       end
+      graphics.push(x, y, r, sx, sy)
       graphics.print(c.character, line.font, x + c.x - self.w/2, y + c.y - self.h/2, c.r or 0, c.sx or 1, c.sy or c.sx or 1, c.ox or 0, c.oy or 0)
-      graphics.set_color(white)
+      graphics.pop()
+      graphics.set_color(self.white)
     end
   end
 end
