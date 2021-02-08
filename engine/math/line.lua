@@ -2,7 +2,7 @@
 -- Implements every function that Polygon does.
 Line = Object:extend()
 Line:implement(Polygon)
-function Line:new(x1, y1, x2, y2)
+function Line:init(x1, y1, x2, y2)
   self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
   self.x, self.y = (self.x1 + self.x2)/2, (self.y1 + self.y2)/2
   self.vertices = {x1, y1, x2, y2}

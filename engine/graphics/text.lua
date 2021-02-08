@@ -50,7 +50,7 @@ text = Text({
 -- The text object itself also has .w and .h which corresponds to the width of the biggest line and height of all lines + offsets, respectively.
 -- If 'alignment_width' is set to a specific line then that line will be automatically set to that width, and if it is the biggest then .w will also be set to that value.
 Text = Object:extend()
-function Text:new(text_data, text_tags)
+function Text:init(text_data, text_tags)
   self.timer = Timer()
   self.text_data = text_data
   self.text_tags = text_tags
@@ -271,6 +271,6 @@ end
 
 -- The text tag objects to be used with text instances.
 TextTag = Object:extend()
-function TextTag:new(actions)
+function TextTag:init(actions)
   self.actions = actions
 end

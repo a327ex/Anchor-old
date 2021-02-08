@@ -6,7 +6,7 @@
 -- You can access the colors values via .r, .g, .b and .a.
 -- You can create a copy of a color by calling color:clone().
 Color = Object:extend()
-function Color:new(r, g, b, a)
+function Color:init(r, g, b, a)
   if type(r) == "string" then
     local hex = r:gsub("#", "")
     self.r = tonumber("0x" .. hex:sub(1, 2))/255

@@ -1,7 +1,7 @@
 -- The class responsible for loading and drawing tilesets.
 -- This is primarily used by the Tilemap class.
 Tileset = Object:extend()
-function Tileset:new(image, tile_w, tile_h)
+function Tileset:init(image, tile_w, tile_h)
   self.image = image
   self.tile_w, self.tile_h = tile_w, tile_h
   self.grid = Grid(math.floor(self.image.w/self.tile_w), math.floor(self.image.h/self.tile_h), 0)

@@ -8,9 +8,11 @@ if not path:find("init") then
   require(path .. ".system")
   require(path .. ".datastructures.graph")
   require(path .. ".datastructures.grid")
-  require(path .. ".game.steering")
   require(path .. ".game.gameobject")
   require(path .. ".game.group")
+  require(path .. ".game.state")
+  require(path .. ".game.physics")
+  require(path .. ".game.steering")
   require(path .. ".graphics.animation")
   require(path .. ".graphics.camera")
   require(path .. ".graphics.canvas")
@@ -32,10 +34,9 @@ if not path:find("init") then
   require(path .. ".math.spring")
   require(path .. ".math.triangle")
   require(path .. ".math.vector")
-  require(path .. ".timer")
+  require(path .. ".trigger")
   require(path .. ".input")
   require(path .. ".sound")
-  require(path .. ".log")
 end
 
 function engine_run(config)
@@ -53,17 +54,15 @@ function engine_run(config)
     if config.msaa ~= 'max' then msaa = config.msaa end
     if config.anisotropy ~= 'max' then anisotropy = config.anisotropy end
 
-    gw, gh = config.game_width or 1920, config.game_height or 1080
-    sx, sy = window_width/(config.game_width or 1920), window_height/(config.game_height or 1080)
+    gw, gh = config.game_width or 480, config.game_height or 270
+    sx, sy = window_width/(config.game_width or 480), window_height/(config.game_height or 270)
     ww, wh = window_width, window_height
 
-    love.window.setMode(window_width, window_height, {
-      fullscreen = config.fullscreen, borderless = config.borderless, resizable = config.resizable, vsync = config.vsync, msaa = msaa or 0, display = config.display
-    })
+    love.window.setMode(window_width, window_height, {fullscreen = config.fullscreen, vsync = config.vsync, msaa = msaa or 0, display = config.display})
     love.window.setTitle(config.game_name)
 
   else
-    gw, gh = config.game_width or 1920, config.game_height or 1080
+    gw, gh = config.game_width or 480, config.game_height or 270 
     sx, sy = 2, 2
     ww, wh = 960, 540
   end
@@ -71,23 +70,23 @@ function engine_run(config)
   love.graphics.setBackgroundColor(0, 0, 0, 1)
   love.graphics.setColor(1, 1, 1, 1)
   love.joystick.loadGamepadMappings("engine/gamecontrollerdb.txt")
-  graphics.set_line_style(config.line_style or "smooth")
-  graphics.set_default_filter(config.default_filter or "linear", config.default_filter or "linear", anisotropy or 0)
+  graphics.set_line_style(config.line_style or "rough")
+  graphics.set_default_filter(config.default_filter or "nearest", config.default_filter or "nearest", anisotropy or 0)
 
   combine = Shader("default.vert", "combine.frag")
   replace = Shader("default.vert", "replace.frag")
   full_combine = Shader("default.vert", "full_combine.frag")
 
-  input.bind('f12', 'f12')
-  for k, v in pairs(config.input or {}) do input.bind(k, v) end
+  input = Input()
+  input:bind_all()
+  for k, v in pairs(config.input or {}) do input:bind(k, v) end
   random = Random()
-  timer = Timer()
+  trigger = Trigger()
   camera = Camera(gw/2, gh/2)
   mouse = Vector(0, 0)
   last_mouse = Vector(0, 0)
   mouse_dt = Vector(0, 0)
-  log.group = Group()
-  config.init()
+  init()
 
   if love.timer then love.timer.step() end
 
@@ -128,14 +127,13 @@ function engine_run(config)
     accumulator = accumulator + dt
     while accumulator >= fixed_dt do
       frame = frame + 1
-      input.update()
-      timer:update(fixed_dt)
+      input:update(fixed_dt)
+      trigger:update(fixed_dt)
       camera:update(fixed_dt)
       local mx, my = love.mouse.getPosition()
       mouse:set(mx/sx, my/sy)
       mouse_dt:set(mouse.x - last_mouse.x, mouse.y - last_mouse.y)
-      log.group:update(fixed_dt)
-      config.update(fixed_dt)
+      update(dt)
       system.update()
       input.last_key_pressed = nil
       last_mouse:set(mouse.x, mouse.y)
@@ -146,8 +144,7 @@ function engine_run(config)
     if love.graphics and love.graphics.isActive() then
       love.graphics.origin()
       love.graphics.clear(love.graphics.getBackgroundColor())
-      config.draw()
-      log.group:draw()
+      draw()
       love.graphics.present()
     end
 

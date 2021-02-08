@@ -1,33 +1,35 @@
 -- The Group class is responsible for object management.
 -- A common usage is to create different groups for different "layers" of behavior in the game:
 --[[
-function init()
-  main = Group(camera):set_as_physics_world(192)
-  effects = Group(camera)
-  floor = Group(camera)
-  ui = Group()
+Game = Object:extend()
+Game:implement(State)
+function Game:on_enter()
+  self.main = Group():set_as_physics_world(192)
+  self.effects = Group()
+  self.floor = Group()
+  self.ui = Group():no_camera()
 end
 
 
-function update(dt)
-  main:update(dt)
-  floor:update(dt)
-  effects:update(dt)
-  ui:update(dt)
+function Game:update(dt)
+  self.main:update(dt)
+  self.floor:update(dt)
+  self.effects:update(dt)
+  self.ui:update(dt)
 end
 
 
-function draw()
-  floor:draw()
-  main:sort_by_y()
-  main:draw()
-  effects:draw()
-  ui:draw()
+function Game:draw()
+  self.floor:draw()
+  self.main:sort_by_y()
+  self.main:draw()
+  self.effects:draw()
+  self.ui:draw()
 end
 ]]--
 
 -- This is a simple example where you have four groups, each for a different purpose.
--- The main group is where all gameplay objects are and thus the only one that's using box2d.
+-- The main group is where all gameplay objects are and thus the only one that's using the physics world (box2d).
 -- If you need an object to collide with another physically then they have to use the same physics world, and thus also the same group.
 -- The effects and floor groups are purely visual, one for drawing things on the floor (it's a top-down-ish 2.5D game), like shadows, and the other for drawing visual effects on top of everything else.
 -- As you can see in the draw function, floor is drawn first and effects is drawn after all gameplay objects.
@@ -35,7 +37,7 @@ end
 -- Finally, the UI group is the one that doesn't have a camera attached to it because we want its objects to be drawn in fixed locations on the screen.
 -- And this group is also drawn last because generally UI elements go on top of literally everything else.
 Group = Object:extend()
-function Group:new(camera, w, h)
+function Group:new()
   self.timer = Timer()
   self.camera = camera
   self.objects = {}
@@ -63,14 +65,15 @@ function Group:update(dt)
     if self.objects[i].dead then
       if self.objects[i].destroy then self.objects[i]:destroy() end
       self.objects.by_id[self.objects[i].id] = nil
-      if moonscript then table.delete(self.objects.by_class[self.objects[i].__class], function(v) return v.id == self.objects[i].id end)
-      else table.delete(self.objects.by_class[getmetatable(self.objects[i])], function(v) return v.id == self.objects[i].id end) end
+      table.delete(self.objects.by_class[getmetatable(self.objects[i])], function(v) return v.id == self.objects[i].id end)
       table.remove(self.objects, i)
     end
   end
 end
 
 
+-- scroll_factor_x and scroll_factor_y can be used for parallaxing, they should be values between 0 and 1
+-- The closer to 0, the more of a parallaxing effect there will be.
 function Group:draw(scroll_factor_x, scroll_factor_y)
   if self.camera then self.camera:attach(scroll_factor_x, scroll_factor_y) end
     for _, object in ipairs(self.objects) do object:draw() end
@@ -92,14 +95,8 @@ end
 function Group:draw_class(class, scroll_factor_x, scroll_factor_y)
   if self.camera then self.camera:attach(scroll_factor_x, scroll_factor_y) end
     for _, object in ipairs(self.objects) do
-      if moonscript then
-        if object.__class == class then
-          object:draw()
-        end
-      else
-        if object:is(class) then
-          object:draw()
-        end
+      if object:is(class) then
+        object:draw()
       end
     end
   if self.camera then self.camera:detach() end
@@ -111,11 +108,18 @@ end
 function Group:draw_all_except(classes, scroll_factor_x, scroll_factor_y)
   if self.camera then self.camera:attach(scroll_factor_x, scroll_factor_y) end
     for _, object in ipairs(self.objects) do
-      if not table.any(classes, function(v) if moonscript then return object.__class == v else return object:is(v) end end) then
+      if not table.any(classes, function(v) return object:is(v) end) then
         object:draw()
       end
     end
   if self.camera then self.camera:detach() end
+end
+
+
+-- Sets this group as one without a camera, useful for things like UIs
+function Group:no_camera()
+  self.camera = nil
+  return self
 end
 
 
@@ -153,14 +157,12 @@ function Group:destroy()
 end
 
 
--- Adds an existing object to the game
--- player = Player(group, 160, 80)
--- group:add_object(player)
+-- Adds an existing object to the group
+-- player = Player(160, 80)
+-- group:add(player)
 -- The object has its .group attribute set to this group, and has a random .id set if it doesn't already have one
--- This function is automatically called when a GameObject is created, so it doesn't actually need to be called ever
-function Group:add_object(object)
+function Group:add(object)
   local class = getmetatable(object)
-  if moonscript then class = object.__class end
   object.group = self
   if not object.id then object.id = random:uid() end
   self.objects.by_id[object.id] = object
@@ -178,7 +180,7 @@ function Group:get_object_by_id(id)
 end
 
 
--- Returns an object after searching for it by property, the property value must be unique among all nodes
+-- Returns the first object found after searching for it by property, the property value must be unique among all objects
 -- group:get_object_by_property('special_id', 347762) -> the object
 function Group:get_object_by_property(key, value)
   for _, object in ipairs(self.objects) do
@@ -189,6 +191,8 @@ function Group:get_object_by_property(key, value)
 end
 
 
+-- Returns an object after searching for it by properties with all of them matching, the property value match must be unique among all objects
+-- group:get_object_by_properties({'special_id_1', 'special_id_2'}, {347762, 32452}) -> the object
 function Group:get_object_by_properties(keys, values)
   for _, object in ipairs(self.objects) do
     local this_is_the_object = true
@@ -240,7 +244,7 @@ function Group:get_objects_in_shape(shape, object_types, exclude_list)
           for _, object in ipairs(cell_objects) do
             if object_types then
               if not table.any(exclude_list, function(v) return v.id == object.id end) then
-                if table.any(object_types, function(v) if moonscript then return object.__class == v else return object:is(v) end end) and object.shape and object.shape:is_colliding_with_shape(shape) then
+                if table.any(object_types, function(v) return object:is(v) end) and object.shape and object.shape:is_colliding_with_shape(shape) then
                   table.insert(out, object)
                 end
               end

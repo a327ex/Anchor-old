@@ -1,6 +1,6 @@
 -- A circle class.
 Circle = Object:extend()
-function Circle:new(x, y, rs)
+function Circle:init(x, y, rs)
   self.x, self.y = x, y
   self.rs = rs
   self.w, self.h = 2*self.rs, 2*self.rs

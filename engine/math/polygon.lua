@@ -1,6 +1,6 @@
 -- A polygon class.
 Polygon = Object:extend()
-function Polygon:new(vertices)
+function Polygon:init(vertices)
   self.vertices = vertices
   self:get_size()
   self:get_bounds()

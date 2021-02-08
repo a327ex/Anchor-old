@@ -1,6 +1,6 @@
 -- The base Shader class.
 Shader = Object:extend()
-function Shader:new(vertex_name, fragment_name)
+function Shader:init(vertex_name, fragment_name)
   self.shader = love.graphics.newShader("assets/shaders/" .. (vertex_name or "default.vert"), "assets/shaders/" .. fragment_name)
 end
 

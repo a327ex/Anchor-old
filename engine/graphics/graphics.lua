@@ -101,7 +101,7 @@ function graphics.rectangle(x, y, w, h, rx, ry, color, line_width)
 end
 
 
--- Draws a rectangle of size w, h centered on x + w/2, y + h/2.
+-- Draws a rectangle of size w, h centered on x - w/2, y - h/2.
 -- If rx, ry are passed in, then the rectangle will have rounded corners with radius of that size.
 -- If color is passed in then the rectangle will be filled with that color (color is Color object)
 -- If line_width is passed in then the rectangle will not be filled and will instead be drawn as a set of lines of the given width.
@@ -299,6 +299,27 @@ end
 
 function graphics.set_stencil_test(...)
   love.graphics.setStencilTest(...)
+end
+
+
+local stencil_mask_shader = love.graphics.newShader[[
+vec4 effect(vec4 color, Image texture, vec2 tc, vec2 pc) {
+  vec4 t = Texel(texture, tc);
+  if (t.a == 0.0) {
+    discard;
+  }
+  return t;
+}
+]]
+
+-- Draws the second image on top of the first but only the portions of it that aren't transparent are drawn.
+-- action1 and action2 are functions that draw the images.
+-- graphics.draw_intersection(function() player_image:draw(player.x, player.y) end, function() gradient_image:draw(player.x, player.y) end) -> draws the player with a gradient applied to it
+function graphics.draw_intersection(action1, action2)
+  graphics.stencil(function() love.graphics.setShader(stencil_mask_shader); action1(); love.graphics.setShader() end, 'replace', 1)
+  graphics.set_stencil_test('greater', 0)
+  action2()
+  graphics.set_stencil_test()
 end
 
 

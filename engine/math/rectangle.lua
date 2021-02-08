@@ -2,7 +2,7 @@
 -- Implements every function that Polygon does.
 Rectangle = Object:extend()
 Rectangle:implement(Polygon)
-function Rectangle:new(x, y, w, h, r)
+function Rectangle:init(x, y, w, h, r)
   self.x, self.y, self.w, self.h, self.r = x, y, w, h, r
   local x1, y1 = math.rotate_point(x - w/2, y - h/2, r or 0, x, y)
   local x2, y2 = math.rotate_point(x + w/2, y - h/2, r or 0, x, y)
@@ -21,7 +21,7 @@ end
 -- Implements every function that Polygon does.
 EmeraldRectangle = Object:extend()
 EmeraldRectangle:implement(Polygon)
-function EmeraldRectangle:new(x, y, w, h, rx, ry, r)
+function EmeraldRectangle:init(x, y, w, h, rx, ry, r)
   self.x, self.y, self.w, self.h, self.r = x, y, w, h, r
   self.rx, self.ry = rx, ry
   local x1, y1 = math.rotate_scale_point(x - w/2, y - h/2 + ry, r or 0, x, y)

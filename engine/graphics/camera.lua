@@ -1,5 +1,5 @@
 Shake = Object:extend()
-function Shake:new(amplitude, duration, frequency)
+function Shake:init(amplitude, duration, frequency)
   self.amplitude = amplitude or 0
   self.duration = duration or 0
   self.frequency = frequency or 60
@@ -90,11 +90,10 @@ end
 -- x, y - the camera's position in world coordinates, the camera is always centered around its x, y coordinates
 -- w, h - the camera's size, generally this should be the same as game_width and game_height (or gw and gh) passed in engine_run
 Camera = Object:extend()
-function Camera:new(x, y, w, h)
+function Camera:init(x, y, w, h)
   self.x, self.y = x, y
   self.w, self.h = w or gw, h or gh
   self.r, self.sx, self.sy = 0, 1, 1
-  self.timer = Timer()
   self.mouse = Vector(0, 0)
   self.last_mouse = Vector(0, 0)
   self.mouse_dt = Vector(0, 0)
@@ -181,7 +180,6 @@ end
 
 
 function Camera:update(dt)
-  self.timer:update(dt)
   self.mouse.x, self.mouse.y = self:get_mouse_position()
   self.mouse_dt.x, self.mouse_dt.y = self.mouse.x - self.last_mouse.x, self.mouse.y - self.last_mouse.y
   self.shake_amount:set(0, 0)

@@ -8,7 +8,7 @@
 -- The created solids are stored in .solids after the tilemap instance is created. They should be added to the same group that you want gameplay objects to collide with the map's solid walls.
 -- Solids are evaluated before tile rules are applied to the tile grid.
 Tilemap = Object:extend()
-function Tilemap:new(x, y, tileset, tile_grid, tile_rules, solid_rules)
+function Tilemap:init(x, y, tileset, tile_grid, tile_rules, solid_rules)
   self.tileset = tileset
   self.grid = tile_grid
   self.x, self.y = x, y
@@ -61,6 +61,6 @@ end
 -- This class is responsible for loading tile rules exported by rxi's Tilekit https://rxi.itch.io/tilekit
 -- An instance of this class should be passed in as the third argument for a Tilemap instance
 TilekitRules = Object:extend()
-function TilekitRules:new(rules_filename)
+function TilekitRules:init(rules_filename)
   self.process = require('assets/maps/' .. rules_filename)
 end

@@ -2,7 +2,7 @@
 -- See this article https://github.com/a327ex/blog/issues/60 for more details.
 -- The argument passed in are: the initial value of the spring, its stiffness and damping.
 Spring = Object:extend()
-function Spring:new(x, k, d)
+function Spring:init(x, k, d)
   self.x = x or 0
   self.k = k or 100
   self.d = d or 10

@@ -2,7 +2,7 @@
 -- Implements every function that Polygon does.
 Triangle = Object:extend()
 Triangle:implement(Polygon)
-function Triangle:new(x, y, w, h)
+function Triangle:init(x, y, w, h)
   self.x, self.y, self.w, self.h = x, y, w, h
   local x1, y1 = x + h/2, y
   local x2, y2 = x - h/2, y - w/2
@@ -18,7 +18,7 @@ end
 -- Implements every function that Polygon does.
 EquilateralTriangle = Object:extend()
 EquilateralTriangle:implement(Polygon)
-function EquilateralTriangle:new(x, y, w)
+function EquilateralTriangle:init(x, y, w)
   self.x, self.y, self.w = x, y, w
   local h = math.sqrt(math.pow(w, 2) - math.pow(w/2, 2))
   local x1, y1 = x + h/2, y

@@ -1,6 +1,6 @@
 Object = {}
 Object.__index = Object
-function Object:new()
+function Object:init()
 end
 
 
@@ -48,6 +48,11 @@ end
 
 function Object:__call(...)
   local obj = setmetatable({}, self)
-  obj:new(...)
+  obj:init(...)
   return obj
+end
+
+
+function new_class(base)
+  return (base or Object):extend()
 end

@@ -2,7 +2,7 @@
 -- Implements every function that Polygon does.
 Chain = Object:extend()
 Chain:implement(Polygon)
-function Chain:new(loop, vertices)
+function Chain:init(loop, vertices)
   self.loop = loop
   self.vertices = vertices
   self:get_size()

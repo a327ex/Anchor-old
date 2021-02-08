@@ -1,5 +1,5 @@
 Graph = Object:extend()
-function Graph:new()
+function Graph:init()
   self.adjacency_list = {}
   self.nodes = {}
   self.edges = {}

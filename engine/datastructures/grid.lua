@@ -3,7 +3,7 @@
 -- Starts a new grid with 3 width, 2 height and values 1, 2, 3 in the first row and 3, 4, 5 in the second row.
 -- grid = Grid(3, 2, {1, 2, 3, 4, 5, 6})
 Grid = Object:extend()
-function Grid:new(w, h, v)
+function Grid:init(w, h, v)
   self.grid = {}
   self.w, self.h = w, h
   if type(v) ~= 'table' then
@@ -37,7 +37,6 @@ end
 -- grid:set(2, 2, 1)
 -- grid:get(2, 2) -> 1
 -- grid:set(11, 1, 1) -> doesn't actually set because out of bounds, fails silently
--- TODO: send a log message on errors like this instead of just failing silently (when the engine is further along)
 function Grid:set(x, y, v)
   if not self:_is_outside_bounds(x, y) then
     self.grid[self.w*(y-1) + x] = v
@@ -46,11 +45,21 @@ end
 
 
 -- Applies function f to all grid elements
+-- If i1,j1 and i2,j2 are passed then it applies only to the subgrid defined by those values.
 -- grid:apply(function(grid, i, j) grid:set(i, j, 0) end) -> sets all elements in the grid to 0
-function Grid:apply(f)
-  for i = 1, self.w do
-    for j = 1, self.h do
-      f(self, i, j)
+-- grid:apply(function(grid, i, j) grid:set(i, j, 0) end, 2, 2, 4, 4) -> sets all elements in the subgrid 2,2x4,4 to 0
+function Grid:apply(f, i1, j1, i2, j2)
+  if i1 and j1 and i2 and j2 then
+    for i = i1, i2 do
+      for j = j1, j2 do
+        f(self, i, j)
+      end
+    end
+  else
+    for i = 1, self.w do
+      for j = 1, self.h do
+        f(self, i, j)
+      end
     end
   end
 end
@@ -69,13 +78,25 @@ end
 
 
 -- Converts the 2D grid to a 1D array
+-- If i1,j1 and i2,j2 are passed then it applies only to the subgrid defined by those values.
 -- grid = Grid(3, 2, 1)
 -- grid:to_table() -> {1, 1, 1, 1, 1, 1}
-function Grid:to_table()
+-- grid:to_table(1, 1, 2, 2) -> {1, 1, 1, 1}
+function Grid:to_table(i1, j1, i2, j2)
   local t = {}
-  for j = 1, self.h do
-    for i = 1, self.w do
-      table.insert(t, self:get(i, j))
+  if i1 and j1 and i2 and j2 then
+    for j = j1, j2 do
+      for i = i1, i2 do
+        if self:get(i, j) then
+          table.insert(t, self:get(i, j))
+        end
+      end
+    end
+  else
+    for j = 1, self.h do
+      for i = 1, self.w do
+        table.insert(t, self:get(i, j))
+      end
     end
   end
   return t, self.w

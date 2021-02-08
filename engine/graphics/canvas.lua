@@ -1,6 +1,6 @@
 -- A canvas object for offscreen rendering.
 Canvas = Object:extend()
-function Canvas:new(w, h, opts)
+function Canvas:init(w, h, opts)
   local opts = opts or {}
   self.w, self.h = w, h
   self.canvas = love.graphics.newCanvas(self.w, self.h, {msaa = opts.msaa})
@@ -9,7 +9,6 @@ end
 
 
 -- Draws the canvas to the screen.
--- If you're not using the Game class and you want to use a canvas, then you want to draw it to the screen like so:
 --[[
 function init()
   canvas = Canvas(gw, gh)
