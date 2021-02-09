@@ -15,8 +15,11 @@ end
 -- This simply implements the GameObject class as a mixin into your own class, giving it the functions defined in this file as well as the attributes set from init_game_object.
 -- In general you'd create your own game object like this, for instance:
 -- group = Group()
--- group:add(MyGameObject{x = 100, y = 100, v = 100, r = math.pi/4})
+-- MyGameObject{group = group, x = 100, y = 100, v = 100, r = math.pi/4}
 -- And then this object would be automatically updated and drawn by the group.
+-- Alternatively you could add the object to the group manually:
+-- my_object = MyGameObject{x = 100, y = 100, v = 100, r = math.pi/4}
+-- group:add(my_object)
 -- One of the nice patterns I've found was a passing arguments as a key + value table.
 -- So in the case above, the object would automatically have its .x, .y and .v attributes set to 100 and its .r attribute set to math.pi/4.
 GameObject = Object:extend()

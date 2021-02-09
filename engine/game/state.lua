@@ -26,11 +26,13 @@ end
 -- Use the on_enter function for things you need to do whenever the state gets activated.
 -- By default, whenever a state gets deactivated it's not deleted from memory, so if you want to restart a level, for instance, whenever you switch states,
 -- then you need to destroy everything that needs to be destroyed in an on_exit function and then recreate it again in the on_enter function.
+--
 -- You'd add a state to the game like this:
 --   state.add(MyState'level_1')
 -- You'd move to that state like so:
 --   state.go_to'level_1'
 -- state.go_to automatically calls on_exit for the currently active state and on_enter for the new one.
+-- You can access the currently active state with state.current.
 State = Object:extend()
 function State:init_state(name)
   self.name = name or random:uid()

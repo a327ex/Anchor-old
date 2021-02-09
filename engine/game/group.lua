@@ -37,8 +37,8 @@ end
 -- Finally, the UI group is the one that doesn't have a camera attached to it because we want its objects to be drawn in fixed locations on the screen.
 -- And this group is also drawn last because generally UI elements go on top of literally everything else.
 Group = Object:extend()
-function Group:new()
-  self.timer = Timer()
+function Group:init()
+  self.trigger = Trigger()
   self.camera = camera
   self.objects = {}
   self.objects.by_id = {}
@@ -158,8 +158,10 @@ end
 
 
 -- Adds an existing object to the group
--- player = Player(160, 80)
+-- player = Player{x = 160, y = 80}
 -- group:add(player)
+-- Creates an object and automatically add it to the group
+-- player = Player{group = group, x = 160, y = 80}
 -- The object has its .group attribute set to this group, and has a random .id set if it doesn't already have one
 function Group:add(object)
   local class = getmetatable(object)

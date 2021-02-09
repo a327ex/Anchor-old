@@ -118,7 +118,7 @@ function engine_run(config)
         elseif name == "gamepadpressed" then input.gamepad_state[input.index_to_gamepad_button[b]] = true; input.last_key_pressed = input.index_to_gamepad_button[b]
         elseif name == "gamepadreleased" then input.gamepad_state[input.index_to_gamepad_button[b]] = false
         elseif name == "gamepadaxis" then input.gamepad_axis[input.index_to_gamepad_axis[b]] = c
-        elseif name == "textinput" then input.textinput(a) end
+        elseif name == "textinput" then input:textinput(a) end
       end
     end
 

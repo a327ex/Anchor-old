@@ -291,7 +291,7 @@ function Physics:get_random_object_in_shape(shape, object_types, exclude_list)
 end
 
 
-function Physics:physics_update(dt)
+function Physics:update_physics(dt)
   self:update_position()
   self:steering_update(dt)
 
@@ -337,7 +337,7 @@ end
 
 -- Returns the object's position as two values 
 -- x, y = self:get_position()
-function Physics:body_get_position()
+function Physics:get_position()
   self:update_position()
   if self.body then return self.body:getPosition() end
 end

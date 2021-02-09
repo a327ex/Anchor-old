@@ -22,7 +22,7 @@ end
 
 function love.run()
   return engine_run({
-    game_name = 'a327ex',
+    game_name = 'Anchor',
     window_width = 480*3,
     window_height = 270*3,
   })

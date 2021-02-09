@@ -3,7 +3,7 @@ Parent = Object:extend()
 
 -- Follows the parent's transform exclusively.
 -- This means that if the parent dies the entity also dies.
-function Parent:follow_parent_exclusive()
+function Parent:follow_parent_exclusively()
   if self.parent and self.parent.dead then
     self.parent = nil
     self.dead = true

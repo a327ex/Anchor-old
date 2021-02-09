@@ -16,7 +16,7 @@ function Input:init(joystick_index)
   self.gamepad_state = {}
   self.previous_gamepad_state = {}
   self.actions = {}
-  self.textinput_buffer = ""
+  self.textinput_buffer = ''
 end
 
 

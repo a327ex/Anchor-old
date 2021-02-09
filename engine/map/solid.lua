@@ -2,8 +2,8 @@ Solid = Object:extend()
 Solid:implement(GameObject)
 
 
-function Solid:init(group, x, y, opts)
-  self:new_game_object(group, x, y, opts)
+function Solid:init(args)
+  self:init_game_object(args)
   self:set_as_chain(true, self.vertices, 'static', 'solid')
 end
 
