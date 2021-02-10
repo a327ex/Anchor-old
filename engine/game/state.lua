@@ -51,30 +51,6 @@ function State:exit(to)
 end
 
 
-function State:hide()
-  self.hidden = true
-  if self.on_hide then self:on_hide() end
-end
-
-
-function State:unhide()
-  self.hidden = false
-  if self.on_unhide then self:on_unhide() end
-end
-
-
-function State:pause()
-  self.paused = true
-  if self.on_pause then self:on_pause() end
-end
-
-
-function State:unpause()
-  self.paused = false
-  if self.on_unpause then self:on_unpause() end
-end
-
-
 state = {}
 state.states = {}
 function state.add(state_object)
@@ -106,7 +82,7 @@ end
 
 function state.update(dt)
   for _, state in pairs(state.states) do
-    if (state.active and not state.paused) or state.persistent_update then
+    if state.active or state.persistent_update then
       state:update(dt)
     end
   end
@@ -115,7 +91,7 @@ end
 
 function state.draw()
   for _, state in pairs(state.states) do
-    if (state.active and not state.hidden) or state.persistent_draw then
+    if state.active or state.persistent_draw then
       state:draw()
     end
   end

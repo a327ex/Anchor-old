@@ -31,14 +31,18 @@ function GameObject:init_game_object(args)
   self.sx, self.sy = self.sx or 1, self.sy or 1
   self.id = self.id or random:uid()
   self.trigger = Trigger()
-  self.spring = Spring(1)
+  self.springs = Springs()
+  self.flashes = Flashes()
+  self.hfx = HitFX(self) 
   return self
 end
 
 
 function GameObject:update_game_object(dt)
   self.trigger:update(dt)
-  self.spring:update(dt)
+  self.springs:update(dt)
+  self.flashes:update(dt)
+  self.hfx:update(dt)
   if self.body then self:update_physics(dt) end
 end
 

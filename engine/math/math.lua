@@ -108,15 +108,6 @@ function math.clamp01(v)
 end
 
 
--- Lerps the src angle towards dst using value as the lerp amount.
--- enemy.r = math.lerp_angle(0.2, enemy.r, enemy:angle_to_object(player))
-function math.lerp_angle(value, src, dst)
-  local dt = math.loop((dst-src), 2*math.pi)
-  if dt > math.pi then dt = dt - 2*math.pi end
-  return src + dt*math.clamp01(value)
-end
-
-
 -- Rounds the number n to p digits of precision.
 -- n = math.round(10.94, 1) -> 10.9
 -- n = math.round(45.321, 0) -> 45
@@ -188,12 +179,6 @@ function math.remap(v, old_min, old_max, new_min, new_max)
 end
 
 
-local PI = math.pi
-local PI2 = math.pi/2
-local LN2 = math.log(2)
-local LN210 = 10*math.log(2)
-
-
 -- TODO: fix this since it doesn't work properly for some reason
 -- Lerp corrected for usage with delta time, see more here https://www.construct.net/en/blogs/ashleys-blog-2/using-lerp-delta-time-924
 -- f is a value between 0 and 1 that corresponds to how much of the distance between src and dst will be covered per second, regardless of frame rate.
@@ -203,11 +188,36 @@ function math.lerp_dt(f, dt, src, dst)
 end
 
 
+-- Same as math.lerp_angle except correted for usage with delta time.
+-- math.lerp_angle_dt(0.1, dt, enemy.r, enemy:angle_to_object(player)) -> will cover 90% of the distance between enemy.r and and the enemy's angle to the player per second
+function math.lerp_angle_dt(f, dt, src, dst)
+  return math.lerp_angle((1-f^dt), src, dst)
+end
+
+
 -- Lerps src to dst with lerp value.
 -- v = math.lerp(0.2, self.x, self.x + 100)
 function math.lerp(value, src, dst)
   return src*(1 - value) + dst*value
 end
+
+-- Lerps the src angle towards dst using value as the lerp amount.
+-- enemy.r = math.lerp_angle(0.2, enemy.r, enemy:angle_to_object(player))
+function math.lerp_angle(value, src, dst)
+  local dt = math.loop((dst-src), 2*math.pi)
+  if dt > math.pi then dt = dt - 2*math.pi end
+  return src + dt*math.clamp01(value)
+end
+
+
+
+
+local PI = math.pi
+local PI2 = math.pi/2
+local LN2 = math.log(2)
+local LN210 = 10*math.log(2)
+
+
 
 
 function math.linear(t)

@@ -34,9 +34,13 @@ if not path:find("init") then
   require(path .. ".math.spring")
   require(path .. ".math.triangle")
   require(path .. ".math.vector")
-  require(path .. ".trigger")
-  require(path .. ".input")
+  require(path .. ".game.trigger")
+  require(path .. ".game.input")
   require(path .. ".sound")
+  require(path .. ".game.parent")
+  require(path .. ".game.springs")
+  require(path .. ".game.flashes")
+  require(path .. ".game.hitfx")
 end
 
 function engine_run(config)
