@@ -32,7 +32,9 @@ end
 
 
 function HitFX:add(name, default_flash_duration, ...)
-  if name == 'parent' or name == 'names' or name == 'trigger' then error("Invalid name to be added to the HitFX object. 'parent', 'names' and 'trigger' are reserved names, choose another.") end
+  if name == 'parent' or name == 'names' or name == 'trigger' or name == 'add' or name == 'use' or name == 'update' or name == 'init' or name == 'pull' or name == 'flash' then
+    error("Invalid name to be added to the HitFX object. 'add', 'flash', 'init', 'names', 'parent', 'pull', 'trigger', 'update' and 'use' are reserved names, choose another.")
+  end
   self.parent.flashes:add(name, default_flash_duration)
   self.parent.springs:add(name, ...)
   table.insert(self.names, name)
@@ -43,4 +45,14 @@ end
 function HitFX:use(name, flash_duration, ...)
   self.parent.flashes[name]:flash(flash_duration)
   self.parent.springs[name]:pull(...)
+end
+
+
+function HitFX:pull(name, ...)
+  self.parent.springs[name]:pull(...)
+end
+
+
+function HitFX:flash(name, ...)
+  self.parent.flashes[name]:flash(...)
 end

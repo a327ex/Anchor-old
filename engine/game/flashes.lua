@@ -20,9 +20,11 @@ end
 -- Adds a new flash to the object. The name must be unique and the second argument is the default duration for the flash.
 -- self.flashes:add('hit', 0.15)
 function Flashes:add(name, default_duration)
-  if name == 'trigger' then error("Invalid name to be added to the Flashes object. 'trigger' is a reserved name, choose another.") end
-  self[name] = {x = false, default_duration = default_duration or 0.15, flash = function(_, duration)
-    self[name].x = true
-    self.trigger:after(duration or self[name].default_duration, function() self[name].x = false end, name)
+  if name == 'parent' or name == 'names' or name == 'trigger' or name == 'add' or name == 'use' or name == 'update' or name == 'init' or name == 'pull' or name == 'flash' then
+    error("Invalid name to be added to the Flashes object. 'add', 'flash', 'init', 'names', 'parent', 'pull', 'trigger', 'update' and 'use' are reserved names, choose another.")
+  end
+  self[name] = {f = false, default_duration = default_duration or 0.15, flash = function(_, duration)
+    self[name].f = true
+    self.trigger:after(duration or self[name].default_duration, function() self[name].f = false end, name)
   end}
 end

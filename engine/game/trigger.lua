@@ -55,7 +55,7 @@ end
 
 
 -- Same as every except the action is called immediately when this function is called, and then every delay seconds.
-function Trigger:every_now(delay, action, times, after, tag)
+function Trigger:every_immediate(delay, action, times, after, tag)
   local times = times or 0
   local after = after or function() end
   local tag = tag or random:uid()

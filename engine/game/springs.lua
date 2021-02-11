@@ -24,7 +24,9 @@ end
 -- as the arguments for creating a spring, see engine/math/spring.lua.
 -- self.springs:add('hit', 1)
 function Springs:add(name, x, k, d)
-  if name == 'names' then error("Invalid name to be added to the Springs object. 'names' is a reserved name, choose another.") end
+  if name == 'parent' or name == 'names' or name == 'trigger' or name == 'add' or name == 'use' or name == 'update' or name == 'init' or name == 'pull' or name == 'flash' then
+    error("Invalid name to be added to the Springs object. 'add', 'flash', 'init', 'names', 'parent', 'pull', 'trigger', 'update' and 'use' are reserved names, choose another.")
+  end
   self[name] = Spring(x, k, d)
   table.insert(self.names, name)
 end

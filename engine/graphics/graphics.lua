@@ -71,7 +71,7 @@ end
 function graphics.print_centered(text, font, x, y, r, sx, sy, ox, oy, color)
   local _r, g, b, a = love.graphics.getColor()
   if color then love.graphics.setColor(color.r, color.g, color.b, color.a) end
-  love.graphics.print(text, font.font, x, y, r or 0, sx or 1, sy or 1, (ox or 0) + font:get_text_width(text)/2, (oy or 0) + font:get_height()/2)
+  love.graphics.print(text, font.font, x, y, r or 0, sx or 1, sy or 1, (ox or 0) + font:get_text_width(text)/2, (oy or 0) + font.h/2)
   if color then love.graphics.setColor(_r, g, b, a) end
 end
 

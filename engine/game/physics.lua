@@ -503,6 +503,22 @@ function Physics:set_gravity_scale(v)
 end
 
 
+-- Locks the object horizontally, meaning it can never move up or down.
+-- self:lock_horizontally()
+function Physics:lock_horizontally()
+  local vx, vy = self:get_velocity()
+  self:set_velocity(vx, 0)
+end
+
+
+-- Locks the object vertically, meaning it can never move left or right.
+-- self:lock_vertically()
+function Physics:lock_vertically()
+  local vx, vy = self:get_velocity()
+  self:set_velocity(0, vy)
+end
+
+
 -- Moves this object towards another object
 -- You can either do this by using the speed argument directly, or by using the max_time argument
 -- max_time will override speed since it will make it so that the object reaches the target in a given time

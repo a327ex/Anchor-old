@@ -51,7 +51,7 @@ text = Text({
 -- If 'alignment_width' is set to a specific line then that line will be automatically set to that width, and if it is the biggest then .w will also be set to that value.
 Text = Object:extend()
 function Text:init(text_data, text_tags)
-  self.timer = Timer()
+  self.trigger = Trigger()
   self.text_data = text_data
   self.text_tags = text_tags
   self.white = Color(1, 1, 1, 1)
@@ -61,7 +61,7 @@ end
 
 
 function Text:update(dt)
-  self.timer:update(dt)
+  self.trigger:update(dt)
   self:format_text()
   for _, line in ipairs(self.lines) do
     for i, c in ipairs(line.characters) do
