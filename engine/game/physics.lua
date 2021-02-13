@@ -294,28 +294,6 @@ end
 function Physics:update_physics(dt)
   self:update_position()
   self:steering_update(dt)
-
-  if self.shape then
-    if self.shape.vertices and self.body then
-      self.shape.vertices = {self.body:getWorldPoints(self.fixture:getShape():getPoints())}
-      self.shape:get_centroid()
-    end
-    self.shape:move_to(self:get_position())
-
-    if self.interact_with_mouse then
-      local colliding_with_mouse = self.shape:is_colliding_with_point(self.group:get_mouse_position())
-      if colliding_with_mouse and not self.colliding_with_mouse then
-        self.colliding_with_mouse = true
-        if self.on_mouse_enter then self:on_mouse_enter() end
-      elseif not colliding_with_mouse and self.colliding_with_mouse then
-        self.colliding_with_mouse = false
-        if self.on_mouse_exit then self:on_mouse_exit() end
-      end
-      if self.colliding_with_mouse then
-        if self.on_mouse_stay then self:on_mouse_stay() end
-      end
-    end
-  end
 end
 
 
