@@ -36,6 +36,7 @@ end
 State = Object:extend()
 function State:init_state(name)
   self.name = name or random:uid()
+  self.active = false
 end
 
 
@@ -51,48 +52,59 @@ function State:exit(to)
 end
 
 
-state = {}
-state.states = {}
-function state.add(state_object)
-  state.states[state_object.name] = state_object
+
+-- The main state. This is a global state that is always active and contains all other states.
+Main = Object:extend()
+Main:implement(State)
+function Main:init(name)
+  self:init_state(name)
+  self.states = {}
+  self.transitions = Group():no_camera()
 end
 
 
-function state.get(state_name)
-  return state.states[state_name]
+function Main:update(dt)
+  for _, state in pairs(self.states) do
+    if state.active or state.persistent_update then
+      state:update(dt)
+    end
+  end
+  self.transitions:update(dt)
+end
+
+
+function Main:draw()
+  for _, state in pairs(self.states) do
+    if state.active or state.persistent_draw then
+      state:draw()
+    end
+  end
+  self.transitions:draw()
+end
+
+
+function Main:add(state)
+  self.states[state.name] = state
+end
+
+
+function Main:get(state_name)
+  return self.states[state_name]
 end
 
 
 -- Deactivates the current active state and activates the target one.
 -- Calls on_exit for the deactivated state and on_enter for the activated one.
-function state.go_to(state_object)
-  if type(state_object) == 'string' then state_object = state.get(state_object) end
+function Main:go_to(state, ...)
+  if type(state) == 'string' then state = self:get(state) end
 
-  if state.current then
-    if state.current.active then
-      state.current:exit(state_object)
+  if self.current then
+    if self.current.active then
+      self.current:exit(state)
     end
   end
 
-  local last_state = state.current
-  state.current = state_object
-  state_object:enter(last_state)
-end
-
-
-function state.update(dt)
-  for _, state in pairs(state.states) do
-    if state.active or state.persistent_update then
-      state:update(dt)
-    end
-  end
-end
-
-
-function state.draw()
-  for _, state in pairs(state.states) do
-    if state.active or state.persistent_draw then
-      state:draw()
-    end
-  end
+  local last_state = self.current
+  self.current = state
+  state:enter(last_state, ...)
 end

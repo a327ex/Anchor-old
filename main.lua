@@ -2,21 +2,22 @@ require 'engine'
 
 
 function init()
+  main = Main()
   --[[
   Add your own states by creating them in another file. See engine/game/state.lua.
-    state.add(Game'game')
-    state.go_to('game')
+    main:add(Game'game')
+    main:go_to('game')
   ]]--
 end
 
 
 function update(dt)
-  state.update(dt)
+  main:update(dt)
 end
 
 
 function draw()
-  state.draw()
+  main:draw()
 end
 
 

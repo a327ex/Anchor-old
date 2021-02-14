@@ -38,7 +38,7 @@ end
 -- And this group is also drawn last because generally UI elements go on top of literally everything else.
 Group = Object:extend()
 function Group:init()
-  self.trigger = Trigger()
+  self.t = Trigger()
   self.camera = camera
   self.objects = {}
   self.objects.by_id = {}
@@ -50,6 +50,7 @@ end
 
 
 function Group:update(dt)
+  self.t:update(dt)
   for _, object in ipairs(self.objects) do object:update(dt) end
   if self.world then self.world:update(dt) end
 
