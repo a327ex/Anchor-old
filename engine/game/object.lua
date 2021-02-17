@@ -51,8 +51,3 @@ function Object:__call(...)
   obj:init(...)
   return obj
 end
-
-
-function new_class(base)
-  return (base or Object):extend()
-end

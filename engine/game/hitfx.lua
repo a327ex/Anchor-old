@@ -31,20 +31,20 @@ function HitFX:update(dt)
 end
 
 
-function HitFX:add(name, default_flash_duration, ...)
+function HitFX:add(name, x, k, d, default_flash_duration)
   if name == 'parent' or name == 'names' or name == 'trigger' or name == 'add' or name == 'use' or name == 'update' or name == 'init' or name == 'pull' or name == 'flash' then
     error("Invalid name to be added to the HitFX object. 'add', 'flash', 'init', 'names', 'parent', 'pull', 'trigger', 'update' and 'use' are reserved names, choose another.")
   end
   self.parent.flashes:add(name, default_flash_duration)
-  self.parent.springs:add(name, ...)
+  self.parent.springs:add(name, x, k, d)
   table.insert(self.names, name)
   self[name] = {x = self.parent.springs[name].x, f = self.parent.flashes[name].f}
 end
 
 
-function HitFX:use(name, flash_duration, ...)
+function HitFX:use(name, x, k, d, flash_duration)
   self.parent.flashes[name]:flash(flash_duration)
-  self.parent.springs[name]:pull(...)
+  self.parent.springs[name]:pull(x, k, d)
 end
 
 

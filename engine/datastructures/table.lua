@@ -218,6 +218,23 @@ function table.unify(t, f)
 end
 
 
+-- Counts the number of elements in the table
+-- t = {1, 1, 5, 5, 4, 1, 3, 2, 0, 9, 8, 5, 1, 5, 5, 4, 6}
+-- table.count(t, 1) -> 4
+-- table.count(t, 5) -> 5
+-- table.count(t, 6) -> 1
+-- table.count(t, 4) -> 2
+function table.count(t, v)
+  local n = 0
+  for i = 1, #t do
+    if t[i] == v then
+      n = n + 1
+    end
+  end
+  return n
+end
+
+
 -- Applies function f to all table elements and replaces each element for the value returned by f
 function table.map(t, f, ...)
   for k, v in ipairs(t) do

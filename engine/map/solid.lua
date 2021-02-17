@@ -1,5 +1,6 @@
 Solid = Object:extend()
 Solid:implement(GameObject)
+Solid:implement(Physics)
 
 
 function Solid:init(args)

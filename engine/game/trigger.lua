@@ -47,7 +47,7 @@ function Trigger:every(delay, action, times, after, tag)
   local after = after or function() end
   local tag = tag or random:uid()
   if type(delay) == "number" or type(delay) == "table" then
-    self.triggers[tag] = {type = "every", timer = 0, unresolved_delay = delay, delay = self:resolve_delay(delay), action = action, times = times, max_times = times, after = after}
+    self.triggers[tag] = {type = "every", timer = 0, unresolved_delay = delay, delay = self:resolve_delay(delay), action = action, times = times, max_times = times, after = after, multiplier = 1}
   else
     self.triggers[tag] = {type = "conditional_every", condition = delay, last_condition = false, action = action, times = times, max_times = times, after = after}
   end
@@ -59,7 +59,7 @@ function Trigger:every_immediate(delay, action, times, after, tag)
   local times = times or 0
   local after = after or function() end
   local tag = tag or random:uid()
-  self.triggers[tag] = {type = "every", timer = 0, unresolved_delay = delay, delay = self:resolve_delay(delay), action = action, times = times, max_times = times, after = after}
+  self.triggers[tag] = {type = "every", timer = 0, unresolved_delay = delay, delay = self:resolve_delay(delay), action = action, times = times, max_times = times, after = after, multiplier = 1}
   action()
 end
 
@@ -107,6 +107,13 @@ function Trigger:cancel(tag)
 end
 
 
+-- Resets the timer for a tag.
+-- Useful when you need to start counting that tag from 0 after an event happens.
+function Trigger:reset(tag)
+  self.triggers[tag].timer = 0
+end
+
+
 -- Returns the delay of a given tag.
 -- This is useful when delays are set randomly (trigger:every({2, 4}, ...) would set the delay at a random number between 2 and 4) and you need to know what the value chosen was.
 function Trigger:get_delay(tag)
@@ -118,6 +125,14 @@ end
 -- Useful if you need to know that its the nth time an every action has been called.
 function Trigger:get_every_iteration(tag)
   return self.triggers[tag].max_times - self.triggers[tag].times 
+end
+
+
+-- Sets a multiplier for an every tag.
+-- This is useful when you need the event to happen in a varying interval, like based on the player's attack speed, which might change every frame based on buffs.
+-- Call this on the update function with the appropriate multiplier.
+function Trigger:set_every_multiplier(tag, multiplier)
+  self.triggers[tag].multiplier = multiplier or 1
 end
 
 
@@ -159,9 +174,9 @@ function Trigger:update(dt)
       end
 
     elseif trigger.type == "every" then
-      if trigger.timer > trigger.delay then
+      if trigger.timer > trigger.delay*trigger.multiplier then
         trigger.action()
-        trigger.timer = trigger.timer - trigger.delay
+        trigger.timer = trigger.timer - trigger.delay*trigger.multiplier
         trigger.delay = self:resolve_delay(trigger.unresolved_delay)
         if trigger.times > 0 then
           trigger.times = trigger.times - 1

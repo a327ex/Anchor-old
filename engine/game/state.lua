@@ -95,12 +95,16 @@ end
 
 -- Deactivates the current active state and activates the target one.
 -- Calls on_exit for the deactivated state and on_enter for the activated one.
+-- If on_exit returns true then the deactivated state will be removed from memory.
+-- You must handle the destruction of it yourself in its on_exit function.
 function Main:go_to(state, ...)
   if type(state) == 'string' then state = self:get(state) end
 
   if self.current then
     if self.current.active then
-      self.current:exit(state)
+      if self.current:exit(state) then
+        self.states[state.name] = nil
+      end
     end
   end
 
