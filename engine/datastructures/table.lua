@@ -372,22 +372,17 @@ function table.flatten(t, shallow)
 end
 
 
-local function table_tostring(t)
+-- t = {1, 2, 3, 4}
+-- table.tostring(t) -> '{[1] = 1, [2] = 2, [3] = 3, [4] = 4}'
+function table.tostring(t)
   if type(t) == "table" then
     local str = "{"
     for k, v in ipairs(t) do
       if type(k) ~= "number" then k = '"' .. k .. '"' end
-      str = str .. "[" .. k .. "] = " .. table_tostring(v) .. ", "
+      str = str .. "[" .. k .. "] = " .. table.tostring(v) .. ", "
     end
     return str:sub(1, -3) .. "}"
   else return tostring(t) end
-end
-
-
--- t = {1, 2, 3, 4}
--- table.tostring(t) -> '{[1] = 1, [2] = 2, [3] = 3, [4] = 4}'
-function table.tostring(t)
-  return table_tostring(t)
 end
 
 
@@ -476,7 +471,7 @@ end
 -- Merges both tables based on their indexes, if the second table has values in the same indexes as the first table then those will overwrite the first values.
 -- t1 = {1, 2, ['a'] = 3, ['b'] = function() end}
 -- t2 = {nil, 8, 4, 5, ['a'] = 8}
--- table.merge(t1, t2) -> {1, 8, 4, 5, ['a'] = 8, ['b'] = function() end}
+-- table.merge(t1, t2) -> {1, 2, 8, 4, 5, ['a'] = 8, ['b'] = function() end}
 function table.merge(t1, t2)
   local out = {}
   for k, v in pairs(t1) do out[k] = v end
